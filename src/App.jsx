@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Activity, ArrowLeft, Bell, CalendarDays, CheckCircle2, CirclePlus, Clock3, Compass, Filter, Flame, MapPin, Plus, Search, Settings2, ShieldCheck, Trophy, Users, X, Volleyball, Dribbble, Footprints, UserRound, ImagePlus, Camera, MapPinned, Pencil, Star
 } from 'lucide-react'
@@ -33,10 +33,12 @@ function App() {
   const [activeTab, setActiveTab] = useState('home')
   const [selectedPlayers, setSelectedPlayers] = useState([1, 2, 3])
   const [toast, setToast] = useState('')
-  const [profile, setProfile] = useState({ name: 'Amine Boumiza', city: 'سوسة', sport: 'football', position: 'وسط ميدان', bio: 'نحب الرياضة واللعب الجماعي ⚽', phone: '' })
+  const [profile, setProfile] = useState(() => { try { return { name: 'Amine Boumiza', city: 'سوسة', sport: 'football', position: 'وسط ميدان', bio: 'نحب الرياضة واللعب الجماعي ⚽', ...JSON.parse(localStorage.getItem('takwira24-profile') || '{}') } } catch { return { name: 'Amine Boumiza', city: 'سوسة', sport: 'football', position: 'وسط ميدان', bio: 'نحب الرياضة واللعب الجماعي ⚽' } } })
   const [profileModal, setProfileModal] = useState(false)
   const [profileDraft, setProfileDraft] = useState(profile)
   const [form, setForm] = useState({ sport: 'football', title: '', venue: '', area: 'سوسة', date: '', time: '19:30', total: 10, level: 'متوسط' })
+
+  useEffect(() => { localStorage.setItem('takwira24-profile', JSON.stringify(profile)) }, [profile])
 
   const visibleMatches = useMemo(() => matches.filter(m =>
     (sport === 'all' || m.sport === sport) &&
@@ -81,14 +83,14 @@ function App() {
         <button className={activeTab === 'players' ? 'side-link active' : 'side-link'} onClick={() => setActiveTab('players')}><Users/> <span>اللاعبين</span></button>
         <button className={activeTab === 'profile' ? 'side-link active' : 'side-link'} onClick={() => setActiveTab('profile')}><UserRound/> <span>الملف الشخصي</span></button>
         <div className="side-promo"><div className="promo-ball">⚽</div><strong>اللعبة تحلى بالصحاب</strong><p>لمّ فريقك وخلي الباقي علينا.</p><button onClick={() => setModal(true)}>أنشئ ماتش <ArrowLeft size={15}/></button></div>
-        <div className="sidebar-user"><Avatar initials="AB"/><div><strong>{profile.name}</strong><small>لاعب هاوي</small></div><Settings2 size={17}/></div>
+        <div className="sidebar-user"><Avatar initials={profile.name.split(" ").map(part => part[0]).slice(0,2).join("").toUpperCase() || "T24"}/><div><strong>{profile.name}</strong><small>لاعب هاوي</small></div><Settings2 size={17}/></div>
       </aside>
 
       <main className="main-content">
         <header className="topbar">
           <div className="mobile-brand"><span className="brand-mark"><Footprints size={19}/></span> takwira<span className="brand-24">24</span></div>
           <div className="breadcrumb">الرئيسية <span>/</span> <b>{activeTab === 'home' ? 'اكتشف المباريات' : activeTab === 'players' ? 'اللاعبين' : activeTab === 'profile' ? 'الملف الشخصي' : 'مبارياتي'}</b></div>
-          <div className="top-actions"><span className="online-pill"><i/> متصل الآن</span><button className="icon-button notification" onClick={() => notify('ما عندكش إشعارات جديدة')}><Bell size={19}/><i/></button><Avatar initials="AB" small/></div>
+          <div className="top-actions"><span className="online-pill"><i/> متصل الآن</span><button className="icon-button notification" onClick={() => notify('ما عندكش إشعارات جديدة')}><Bell size={19}/><i/></button><Avatar initials={profile.name.split(" ").map(part => part[0]).slice(0,2).join("").toUpperCase() || "T24"} small/></div>
         </header>
 
         {activeTab === 'home' && <>
