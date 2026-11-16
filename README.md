@@ -1,39 +1,47 @@
 # Takwira24
 
-A sports community for finding players, creating matches and sharing the game.
+تطبيق رياضي تونسي يجمع اللاعبين، ويسهّل اكتشاف المباريات وتكوين الفرق.
 
-## Stack
-- React + Vite
-- Supabase (Auth, Postgres, Storage, Realtime)
-- Capacitor-ready web app structure
+## التقنيات
+- React + Vite لواجهة Mobile-first باللغة العربية وRTL.
+- Supabase للتحضير للمصادقة وقاعدة البيانات والتخزين والتحديثات الفورية.
+- Capacitor 7 لتحويل تطبيق الويب إلى تطبيق Android.
+- PWA manifest + service worker للنسخة القابلة للتثبيت من المتصفح.
 
-## Run locally
+## تشغيل نسخة الويب
 ```bash
 npm install
-cp .env.example .env
 npm run dev
 ```
 
-Add your Supabase project URL and anon/publishable key to `.env`. The UI runs in demo mode without credentials.
+## إعداد Supabase
+1. أنشئ مشروعاً في Supabase.
+2. نفّذ ملف `supabase/schema.sql` من SQL Editor.
+3. انسخ `.env.example` إلى `.env` وأضف `VITE_SUPABASE_URL` و`VITE_SUPABASE_ANON_KEY`.
+4. فعّل طرق تسجيل الدخول المطلوبة واضبط Storage buckets للصور.
 
-## Supabase setup
-1. Create a Supabase project.
-2. Open SQL Editor and run `supabase/schema.sql`.
-3. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to `.env`.
-4. Enable email auth. Configure Storage buckets `avatars` and `media` (the schema includes setup notes).
+## بناء Android
+يتطلب Android Studio وAndroid SDK على جهاز التطوير:
+```bash
+npm install
+npx cap add android
+npm run cap:sync
+npm run android
+``
+بعدها افتح مشروع Android في Android Studio، اختبره على جهاز حقيقي، واضبط package id ونسخة التطبيق والتوقيع قبل إنشاء Android App Bundle (AAB) للنشر على Google Play.
 
-## Current MVP
-- Responsive Arabic RTL sports dashboard.
-- Sport selection (football, handball, basketball).
-- Match creation with venue, date, time and player slots.
-- Player search/selection and pending invitation states.
-- Match feed and profile preview.
-- Demo mode for UI review before Supabase credentials are configured.
+## نشر نسخة الويب
+GitHub Actions يبني نسخة GitHub Pages مع المسار الصحيح تلقائياً. النسخة المنشورة للمعاينة لا تعني أن ملف Android AAB قد تم إنشاؤه أو نشره.
 
-## Next implementation milestones
-- Connect auth/profile onboarding and image uploads.
-- Persist matches and invitations using Supabase.
-- Realtime invitation updates and push notifications.
-- Match completion, score and per-player goal/stat recording.
-- Stories and video publishing with moderation/reporting tools.
-- Capacitor Android packaging and Play Console release.
+## الوضع الحالي
+- واجهة RTL Mobile-first مع هوية رياضية أوضح.
+- اكتشاف مباريات كرة القدم واليد والسلة والطائرة.
+- إنشاء مباراة ببياناتها الأساسية.
+- بحث اللاعبين.
+- تحرير بطاقة اللاعب محلياً في الواجهة.
+- وضع تجريبي عند عدم إعداد مفاتيح Supabase.
+
+## ما يزال مطلوباً قبل الإطلاق
+- ربط تسجيل الدخول والملف الشخصي فعلياً بـ Supabase.
+- حفظ الملف والصور والاشتراكات والدعوات في قاعدة البيانات.
+- اختبار Capacitor على Android وإكمال إعدادات التوقيع وGoogle Play.
