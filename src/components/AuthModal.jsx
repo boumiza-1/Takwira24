@@ -3,13 +3,28 @@ import { LockKeyhole, Mail, UserRound, X } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 export default function AuthModal({ onClose }) {
-  const [mode, setMode] = useState('signin')
+  const [mode, setMode] = useState(() => window.location.hash.includes('type=recovery') ? 'update' : 'signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+
+  async function facebookLogin() {
+    setError('')
+    setBusy(true)
+    try {
+      const { error: issue } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: { redirectTo: window.location.origin + import.meta.env.BASE_URL }
+      })
+      if (issue) throw issue
+    } catch (issue) {
+      setError(issue.message || 'تأكد من تفعيل Facebook في Supabase و Meta Developers')
+      setBusy(false)
+    }
+  }
 
   async function submit(event) {
     event.preventDefault()
@@ -23,6 +38,10 @@ export default function AuthModal({ onClose }) {
         })
         if (requestError) throw requestError
         setMessage('إذا الإيميل مسجّل، باش توصلك رسالة تبديل كلمة السر.')
+      } else if (mode === 'update') {
+        const { error: issue } = await supabase.auth.updateUser({ password })
+        if (issue) throw issue
+        setMessage('تبدّلت كلمة السر. تنجم تدخل بحسابك.')
       } else if (mode === 'signup') {
         const { data, error: signupError } = await supabase.auth.signUp({
           email, password,
@@ -49,7 +68,7 @@ export default function AuthModal({ onClose }) {
         <div className="modal-head">
           <div>
             <span className="eyebrow">TAKWIRA24 ACCOUNT</span>
-            <h2>{mode === 'signup' ? 'إعمل حساب لاعب' : mode === 'reset' ? 'استرجاع كلمة السر' : 'أدخل لحسابك'}</h2>
+            <h2>{mode === 'signup' ? 'إعمل حساب لاعب' : mode === 'reset' ? 'استرجاع كلمة السر' : mode === 'update' ? 'كلمة السر الجديدة' : 'أدخل لحسابك'}</h2>
             <p>بالحساب متاعك تنجم تشارك وتكوّن الماتشات وتتابع الدعوات.</p>
           </div>
           <button type="button" className="icon-button" onClick={onClose} aria-label="إغلاق"><X size={21}/></button>
@@ -57,17 +76,23 @@ export default function AuthModal({ onClose }) {
         {mode === 'signup' && <label className="field-label">إسم اللاعب
           <span className="auth-input-icon"><UserRound size={17}/><input required minLength="2" value={name} onChange={event => setName(event.target.value)} placeholder="إسمك الكامل" /></span>
         </label>}
-        <label className="field-label">البريد الإلكتروني
+        {mode !== 'update' && <label className="field-label">البريد الإلكتروني
           <span className="auth-input-icon"><Mail size={17}/><input required type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} placeholder="example@email.com" dir="ltr" /></span>
-        </label>
+        </label>}
         {mode !== 'reset' && <label className="field-label">كلمة السر
           <span className="auth-input-icon"><LockKeyhole size={17}/><input required type="password" minLength="6" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} value={password} onChange={event => setPassword(event.target.value)} placeholder="6 حروف على الأقل" dir="ltr" /></span>
         </label>}
         {error && <p role="alert" className="auth-error">{error}</p>}
         {message && <p role="status" className="auth-message">{message}</p>}
         <button className="primary-button submit-match" type="submit" disabled={busy}>
-          {busy ? 'لحظة...' : mode === 'signup' ? 'إنشاء الحساب' : mode === 'reset' ? 'أبعث رابط الاسترجاع' : 'تسجيل الدخول'}
+          {busy ? 'لحظة...' : mode === 'signup' ? 'إنشاء الحساب' : mode === 'reset' ? 'أبعث رابط الاسترجاع' : mode === 'update' ? 'تحديث كلمة السر' : 'تسجيل الدخول'}
         </button>
+        {mode === 'signin' && <div className="auth-social">
+          <span>أو ادخل مباشرة بحسابك</span>
+          <button type="button" className="facebook-login" disabled={busy} onClick={facebookLogin}>
+            <strong>f</strong> مواصلة بواسطة Facebook
+          </button>
+        </div>}
         <div className="auth-switch">
           {mode !== 'signin' ? <button type="button" onClick={() => { setMode('signin'); setError(''); setMessage('') }}>عندي حساب، ندخل</button>
             : <><button type="button" onClick={() => { setMode('signup'); setError(''); setMessage('') }}>حساب جديد</button><button type="button" onClick={() => { setMode('reset'); setError(''); setMessage('') }}>نسيت كلمة السر؟</button></>}
