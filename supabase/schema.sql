@@ -3,7 +3,7 @@
 
 create extension if not exists pgcrypto;
 
-create type public.sport_type as enum ('football','handball','basketball');
+create type public.sport_type as enum ('football','handball','basketball','volleyball');
 create type public.match_status as enum ('open','full','in_progress','completed','cancelled');
 create type public.invitation_status as enum ('pending','accepted','declined','cancelled');
 
@@ -156,5 +156,27 @@ create policy "Match host updates results" on public.match_results for update to
 create policy "Users submit reports" on public.reports for insert to authenticated with check (auth.uid() = reporter_id);
 create policy "Users view their own reports" on public.reports for select to authenticated using (auth.uid() = reporter_id);
 
--- Create private buckets in Storage: avatars and media.
--- Keep media private by default; use signed URLs for access.
+-- Public sports-media buckets. Photos uploaded here will be visible to app users.
+-- Only a signed-in user may write inside their own auth.uid()/ folder.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values
+  ('avatars', 'avatars', true, 5242880, array['image/jpeg','image/png','image/webp','image/gif']),
+  ('player-media', 'player-media', true, 5242880, array['image/jpeg','image/png','image/webp','image/gif'])
+on conflict (id) do nothing;
+
+create policy "Public can view avatars" on storage.objects for select to public using (bucket_id = 'avatars');
+create policy "Public can view player photos" on storage.objects for select to public using (bucket_id = 'player-media');
+
+create policy "Users upload own avatars" on storage.objects for insert to authenticated
+with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text);
+create policy "Users upload own photos" on storage.objects for insert to authenticated
+with check (bucket_id = 'player-media' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+create policy "Users remove their own avatars" on storage.objects for delete to authenticated
+using (bucket_id = 'avatars' and (storage.foldername(name))[1] = (select auth.uid())::text);
+create policy "Users remove their own photos" on storage.objects for delete to authenticated
+using (bucket_id = 'player-media' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+-- A joined player can also be invited; the primary join is unique per match.
+-- Example policies must be reviewed for application roles before production.
+
