@@ -3,6 +3,25 @@ import { LockKeyhole, Mail, UserRound, X, Phone, ShieldCheck } from 'lucide-reac
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 
 const redirect = () => window.location.origin + import.meta.env.BASE_URL
+const normalizeEmail = raw => {
+  const email = raw.trim().toLowerCase()
+  if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))
+    throw new Error('الإيميل موش مكتوب بطريقة صحيحة. ثبّت في الاسم و @ والدومين.')
+  return email
+}
+const explainAuthError = error => {
+  const code = String(error?.code || '').toLowerCase()
+  const message = String(error?.message || '')
+  if (code === 'user_already_exists' || /user already registered|already been registered/i.test(message))
+    return 'الإيميل هذا مسجّل قبل. إعمل Login أو استرجع كلمة السر.'
+  if (code === 'email_not_confirmed' || /email not confirmed/i.test(message))
+    return 'إعداد Confirm Email مازال مفعّل في Supabase. يلزم تعطيلو من Authentication → Email.'
+  if (code === 'invalid_credentials' || /invalid login credentials/i.test(message))
+    return 'الإيميل أو كلمة السر موش صحيحين.'
+  if (/email address is invalid|invalid email/i.test(message))
+    return 'صيغة الإيميل غير مقبولة.'
+  return message || 'صار خطأ. عاود جرّب.'
+}
 const normalizePhone = text => {
   const digits = text.trim().replace(/[\s().-]/g, '')
   const number = digits.startsWith('00') ? '+' + digits.slice(2) : digits.startsWith('+') ? digits : '+216' + digits
@@ -32,25 +51,26 @@ export default function AuthModal({ onClose }) {
     if (!isSupabaseConfigured) { setError('قاعدة البيانات موش مربوطة في النسخة هاذي.'); return }
     setBusy(true)
     try {
+      const cleanEmail = normalizeEmail(email)
       if (mode === 'reset') {
-        const { error: requestError } = await supabase.auth.resetPasswordForEmail(email, {redirectTo: redirect()})
+        const { error: requestError } = await supabase.auth.resetPasswordForEmail(cleanEmail, {redirectTo: redirect()})
         if (requestError) throw requestError
         setMessage('إذا الإيميل مسجّل، باش توصلك رسالة لتغيير كلمة السر.')
       } else if (mode === 'signup') {
         const { data, error: signupError } = await supabase.auth.signUp({
-          email: email.trim(), password,
+          email: cleanEmail, password,
           options: { data: { display_name: name.trim() }, emailRedirectTo: redirect() }
         })
         if (signupError) throw signupError
         if (data.session) onClose()
-        else setMessage('الحساب تسجّل، لكن Supabase مازالت تستوجب تأكيد الإيميل. يلزم المسؤول يعطّل Confirm Email من إعدادات المشروع إذا يحب دخول مباشر.')
+        else setError('حسابك مازال يستنّى إعدادات Supabase. Confirm Email لازم يتعطّل من Authentication → Email باش تدخل مباشرة.')
       } else {
-        const { data, error: loginError } = await supabase.auth.signInWithPassword({email:email.trim(), password})
+        const { data, error: loginError } = await supabase.auth.signInWithPassword({email:cleanEmail, password})
         if (loginError) throw loginError
         if(data.session) onClose()
         else setError('تسجيل الدخول ما كملش. تثبّت من الإيميل وكلمة السر.')
       }
-    } catch (cause) { setError(cause.message || 'صار خطأ. عاود جرّب.') }
+    } catch (cause) { setError(explainAuthError(cause)) }
     finally { setBusy(false) }
   }
 
@@ -99,7 +119,7 @@ export default function AuthModal({ onClose }) {
         {error && <p role="alert" className="auth-error">{error}</p>}
         {message && <p role="status" className="auth-message">{message}</p>}
         <button type="submit" disabled={busy} className="primary-button submit-match">{busy?'لحظة...':mode==='signup'?'إعمل حساب جديد':mode==='reset'?'إبعث رابط الاسترجاع':'تسجيل الدخول'}</button>
-        <p className="t24-auth-tip"><ShieldCheck size={15}/> الدخول المباشر يستوجب تعطيل Confirm Email من إعدادات Supabase؛ موش من التطبيق.</p>
+        <p className="t24-auth-tip"><ShieldCheck size={15}/> التسجيل: إيميل بصيغة صحيحة وما يكونش مسجّل قبل. ما ينجمش التطبيق يثبت ملكية الإيميل بلا رسالة.</p>
         <div className="auth-switch">{mode==='signin' ? <>
           <button type="button" onClick={()=>changeMode('signup')}>ما عنديش حساب — نعمل جديد</button>
           <button type="button" onClick={()=>changeMode('reset')}>نسيت كلمة السر؟</button>
