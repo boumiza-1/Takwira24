@@ -6,6 +6,7 @@ import MediaModeration from './components/MediaModeration'
 import FormationPitch from './components/FormationPitch'
 import PlayerSearchModal from './components/PlayerSearchModal'
 import PlayerProfileModal from './components/PlayerProfileModal'
+import ShareMatchPanel from './components/ShareMatchPanel'
 import NotificationsPanel from './components/NotificationsPanel'
 import './app-mobile.css'
 
@@ -36,6 +37,7 @@ export default function App() {
   const [matches, setMatches] = useState([])
   const [lineup, setLineup] = useState([])
   const [selectedMatch, setSelectedMatch] = useState(null)
+  const [openedSharedMatch,setOpenedSharedMatch] = useState(false)
   const [targetSlot, setTargetSlot] = useState(null)
   const [challenges, setChallenges] = useState([])
   const [joinRequests,setJoinRequests] = useState([])
@@ -386,6 +388,18 @@ export default function App() {
     finally { setBusy(false) }
   }
 
+  useEffect(()=>{
+    if(openedSharedMatch||!authReady||!user||matches.length===0) return
+    const matchId=new URLSearchParams(window.location.search).get('match')
+    if(!matchId) return
+    const found=matches.find(m=>m.id===matchId)
+    if(found){
+      setSelectedMatch(found.id)
+      setActiveTab('matches')
+      setOpenedSharedMatch(true)
+    }
+  },[authReady,user?.id,matches,openedSharedMatch])
+
   const currentMatch = matches.find(m => m.id === selectedMatch)
   const participants = lineup.filter(l => l.match_id === selectedMatch)
   const findPlayer = id => players.find(p => p.id === id)
@@ -530,6 +544,7 @@ export default function App() {
               onClick={()=>requestChallenge(currentMatch)}>⚔️ نطلب تحدّي ضد Team A</button>}</div>
           {ownJoinRequests.filter(q=>q.match_id===currentMatch.id).map(q=><p key={q.id}>طلب اللعب مع Team {q.team}: {q.status==='pending'?'⏳ يستنّى المسؤول':q.status==='accepted'?'✅ مقبول':'❌ مرفوض'}</p>)}
         </div>}
+        <ShareMatchPanel match={currentMatch} lineup={lineup}/>
         <FormationPitch outfield={currentMatch.outfield_per_team||6} bench={currentMatch.bench_per_team||0} sport={currentMatch.sport}
           entries={participants} players={players} busy={busy}
           canEdit={canManageTeam(currentMatch,'A')||canManageTeam(currentMatch,'B')}
