@@ -64,3 +64,16 @@
 }
 .tf-football .tf-mark{opacity:.26}
 .tf-football .tf-stadium{background-image:linear-gradient(#102b2077,#112f2277),url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JJJQx7uBtP724OZ2KWNMaPLMsw/84272c46-75d6-40b9-8b0e-f00460e8cae9.png");background-size:cover;background-position:center}
+
+
+/* Invitation states on the real pitch and bench */
+.tf-slot.tf-state-invited .tf-player-circle{opacity:.42;filter:grayscale(.3);border:3px dashed #f9f3af}
+.tf-slot.tf-state-invited .tf-player-name{opacity:.8}
+.tf-slot.tf-state-declined .tf-player-circle{opacity:.72;filter:grayscale(.5) sepia(.55) saturate(5) hue-rotate(314deg);border:3px solid #fa4545!important;box-shadow:0 0 0 3px #f04444aa,0 5px 18px #8b1d1d8c}
+.tf-slot.tf-state-declined .tf-player-name{background:#a22525;color:#fff}
+.tf-state-label{position:absolute;top:-16px;white-space:nowrap;color:#fff;background:#9b7c1a;border-radius:30px;padding:3px 5px;font-size:9px;font-weight:800;box-shadow:0 2px 5px #102b1666}
+.tf-slot.tf-state-declined .tf-state-label{background:#aa2020}
+.tf-bench-player.tf-state-invited .tf-bench-avatar{opacity:.42;filter:grayscale(.3)}
+.tf-bench-player.tf-state-declined .tf-bench-avatar{outline:3px solid #d94444;filter:grayscale(.5)}
+.tf-bench-player.tf-state-declined small{color:#b32929}
+.tf-slot.tf-state-invited,.tf-slot.tf-state-declined{cursor:pointer}
