@@ -84,7 +84,10 @@ export default function MediaModeration({user,onProfileChanged,lang='ar'}) {
     setBusy(true);setError('')
     try{
       if(item.status==='approved'){
-        const {error:deleteError}=await supabase.storage.from('t24-approved').remove([item.storage_path])
+        const publishedPath=item.approved_url?.includes('/t24-approved/')
+          ?decodeURIComponent(item.approved_url.split('/t24-approved/')[1].split('?')[0])
+          :item.storage_path
+        const {error:deleteError}=await supabase.storage.from('t24-approved').remove([publishedPath])
         if(deleteError)throw deleteError
         if(item.kind==='avatar'){
           const {data:p}=await supabase.from('t24_profiles').select('avatar_url').eq('id',item.owner_id).maybeSingle()
