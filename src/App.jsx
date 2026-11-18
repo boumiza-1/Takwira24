@@ -460,7 +460,7 @@ export default function App() {
 
   return <div className="app-shell">
     <aside className="sidebar">
-      <a href="#" className="brand" onClick={e => { e.preventDefault(); setActiveTab('home') }}><span className="brand-mark">⚽</span><span>takwira<span className="brand-24">24</span><small>PLAY MORE. LIVE MORE.</small></span></a>
+      <a href="#" className="brand t24-new-brand" onClick={e => { e.preventDefault(); setActiveTab('home') }} aria-label="Takwira24 - accueil"><img className="t24-logo-emblem" src={`${import.meta.env.BASE_URL}takwira24-logo.webp`} width="70" height="70" alt="Logo TAKWIRA24" /><span className="t24-brand-wordmark">TAKWIRA<span className="brand-24">24</span><small>PLAY MORE. LIVE MORE.</small></span></a>
       <div className="side-label">{t('القائمة الرئيسية','MENU PRINCIPAL')}</div>
       {[['home',Compass,t('اكتشف الماتشات','Découvrir les matchs')],['matches',CalendarDays,t('مبارياتي','Mes matchs')],['players',Users,t('اللاعبين','Les joueurs')],['profile',UserRound,t('حسابي','Mon profil')]].map(([tab,Icon,label])=>
         <button key={tab} className={'side-link ' + (activeTab===tab?'active':'')} onClick={()=>setActiveTab(tab)}><Icon/><span>{label}</span></button>)}
@@ -471,7 +471,7 @@ export default function App() {
     </aside>
     <main className="main-content">
       <header className="topbar">
-        <div className="mobile-brand"><span className="brand-mark">⚽</span> takwira<span className="brand-24">24</span></div>
+        <div className="mobile-brand t24-mobile-brand"><img src={`${import.meta.env.BASE_URL}takwira24-logo.webp`} width="42" height="42" alt="TAKWIRA24" /><strong>TAKWIRA<span className="brand-24">24</span></strong></div>
         <div className="breadcrumb">{t('الرئيسية','Accueil')} / <b>{activeTab==='home'?t('اكتشف الماتشات','Découvrir'):activeTab==='players'?t('اللاعبين','Joueurs'):activeTab==='profile'?t('حسابي','Mon profil'):t('مبارياتي','Mes matchs')}</b></div>
         <div className="top-actions">
           <div className="t24-lang-toggle" role="group" aria-label="Language / اللغة"><button type="button" className={lang==='ar'?'chosen':''} onClick={()=>setLang('ar')}>عربي</button><button type="button" className={lang==='fr'?'chosen':''} onClick={()=>setLang('fr')}>FR</button></div>
@@ -490,7 +490,7 @@ export default function App() {
 
       {activeTab==='home' && <>
         <section className="welcome-row"><div><div className="eyebrow">TAKWIRA24 ⚽</div><h1>{t('الماتش الجاي،','Le prochain match')} <em>{t('يبدأ من هنا.','commence ici.')}</em></h1><p>{t('ماتشوات حقيقية، لاعبين مسجّلين، وتشكيلات تتبدّل لايف.','De vrais matchs, de vrais joueurs, des équipes et des formations en direct.')}</p></div><button className="primary-button" onClick={openMatch}><Plus size={20}/>{t('أنشئ ماتش','Créer un match')}</button></section>
-        <section className="hero-card"><div className="hero-copy"><span className="hero-tag">TAKWIRA COMMUNITY</span><h2>{t('موش لازم تعرف 10 لاعبين.','Pas besoin de connaître 10 joueurs.')}<br/><em>{t('إحنا نلمّوهملك.','On réunit ton équipe.')}</em></h2><p>{t('اختار البلاصة والوقت، وبعد دعّي صحابك.','Choisis le terrain, la date et invite tes amis.')}</p><button onClick={openMatch}>{t('إبدأ كوّن فريقك','Composer mon équipe')} <ArrowLeft size={16}/></button></div><div className="hero-art t24-sport-cover"><div className="t24-cover-glow"/><div className="t24-cover-football">⚽</div><div className="t24-cover-handball">🤾</div></div></section>
+        <section className="hero-card"><div className="hero-copy"><span className="hero-tag">TAKWIRA COMMUNITY</span><h2>{t('موش لازم تعرف 10 لاعبين.','Pas besoin de connaître 10 joueurs.')}<br/><em>{t('إحنا نلمّوهملك.','On réunit ton équipe.')}</em></h2><p>{t('اختار البلاصة والوقت، وبعد دعّي صحابك.','Choisis le terrain, la date et invite tes amis.')}</p><button onClick={openMatch}>{t('إبدأ كوّن فريقك','Composer mon équipe')} <ArrowLeft size={16}/></button></div><div className="hero-art t24-sport-cover"><div className="t24-cover-glow"/><img className="t24-hero-emblem" src={`${import.meta.env.BASE_URL}takwira24-logo.webp`} width="180" height="180" alt="" aria-hidden="true" /></div></section>
         <div className="t24-sports-covers"><div className="t24-sport-tile t24-sport-foot" onClick={()=>setSport("football")} role="button" tabIndex={0} onKeyDown={e=>e.key==="Enter"&&setSport("football")}><span>⚽</span><div><strong>FOOTBALL</strong><small>{t('تيران gazon وتشكيلات حقيقية','Pelouse & formations réalistes')}</small></div></div><div className="t24-sport-tile t24-sport-hand" onClick={()=>setSport("handball")} role="button" tabIndex={0} onKeyDown={e=>e.key==="Enter"&&setSport("handball")}><span>🤾</span><div><strong>HANDBALL</strong><small>{t('ماتشات وأصحاب وتشكيلات','Matchs, équipes et passion')}</small></div></div></div>
         <div className="stats-grid">
           <div className="stat-card"><span className="stat-icon lime-bg"><Activity/></span><div><strong>{matches.length}</strong><small>{t('ماتش موجود','Matchs disponibles')}</small></div></div>
