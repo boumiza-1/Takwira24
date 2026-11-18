@@ -99,7 +99,20 @@ export default function App() {
         supabase.from('t24_challenges').select('*').order('created_at',{ascending:false}).limit(200)
       ])
       for (const item of [peopleResult, gamesResult, lineupResult, challengesResult]) if (item.error) throw item.error
-      setPlayers(peopleResult.data || [])
+      // Include every captain/invited player even if outside the latest 200 public profiles.
+      // Without this, searched players could appear as anonymous placeholders on other devices.
+      const people = peopleResult.data || []
+      const allIds = [...new Set([
+        current.id, ...(gamesResult.data || []).flatMap(m=>[m.host_id,m.opponent_id]),
+        ...(lineupResult.data || []).map(row=>row.player_id),
+        ...(challengesResult.data || []).map(row=>row.challenger_id)
+      ].filter(Boolean))]
+      const notLoaded = allIds.filter(id=>!people.some(p=>p.id===id))
+      const batches=[]
+      for(let i=0;i<notLoaded.length;i+=100) batches.push(notLoaded.slice(i,i+100))
+      const extraResults=await Promise.all(batches.map(ids=>supabase.from('t24_profiles').select('*').in('id',ids)))
+      for(const result of extraResults) if(result.error) throw result.error
+      setPlayers([...new Map([...people,...extraResults.flatMap(x=>x.data||[])].map(p=>[p.id,p])).values()])
       setMatches(gamesResult.data || [])
       setLineup(lineupResult.data || [])
       setChallenges(challengesResult.data || [])
