@@ -344,3 +344,73 @@ input:focus-visible,button:focus-visible,select:focus-visible,textarea:focus-vis
  .t24-season-profile{padding:14px}
  .t24-public-rating-hero{margin:0 12px 12px}
 }
+
+
+/* TAKWIRA24 • official neon crest + match-day UI polish */
+.t24-new-brand{align-items:center;justify-content:center;gap:9px;direction:ltr;margin:0 0 32px;padding:9px 4px 15px;border-bottom:1px solid #ffffff1d;text-decoration:none}
+.t24-logo-emblem{display:block;width:77px;height:77px;object-fit:contain;flex:none;border-radius:16px;filter:drop-shadow(0 7px 17px #97ef7054)}
+.t24-brand-wordmark{display:flex!important;flex-direction:column;align-items:flex-start;justify-content:center;line-height:1;font:900 20px 'DM Sans',sans-serif;letter-spacing:-.8px;color:#fff}
+.t24-brand-wordmark .brand-24{display:inline!important;color:#c5fd66}
+.t24-brand-wordmark small{font:700 8px 'DM Sans',sans-serif;letter-spacing:1.05px;color:#abd29d;margin-top:7px}
+.t24-mobile-brand{display:none;align-items:center;gap:5px;direction:ltr;white-space:nowrap}
+.t24-mobile-brand img{display:block;width:42px;height:42px;object-fit:contain;border-radius:8px}
+.t24-mobile-brand strong{color:#153e28;font:900 15px 'DM Sans',sans-serif;letter-spacing:-.4px}
+.t24-mobile-brand .brand-24{color:#77af31}
+.t24-hero-emblem{position:relative;z-index:1;width:clamp(130px,15vw,198px);height:auto;aspect-ratio:1;object-fit:contain;filter:drop-shadow(0 20px 34px #0009) drop-shadow(0 0 28px #9ff3506b);transform:rotate(-6deg);transition:transform .35s ease}
+.hero-card:hover .t24-hero-emblem{transform:rotate(0deg) scale(1.045)}
+.t24-sport-cover:has(.t24-hero-emblem){display:grid;place-items:center}
+.sidebar .side-link{min-height:46px;font-weight:800;letter-spacing:.1px;transition:background .16s,color .16s,transform .16s}
+.sidebar .side-link.active{background:linear-gradient(110deg,#285f37,#1b422d)!important;box-shadow:inset 3px 0 0 #bdff71}
+.sidebar .side-link:hover{transform:translateX(-2px)}
+.side-promo{border-color:#90be5050;background:linear-gradient(135deg,#16412b,#214b30)}
+.side-promo .promo-ball{font-size:24px}
+.hero-card{isolation:isolate}
+.hero-card .hero-copy{max-width:70%}
+.hero-card .hero-tag{background:#caf57820;border:1px solid #cff88835;border-radius:18px;padding:6px 10px;letter-spacing:1.4px;display:inline-flex;align-items:center}
+.hero-card .hero-copy button{font-weight:900;min-height:41px}
+.match-card-foot{gap:8px;flex-wrap:wrap}
+.match-card-foot .host-mini{min-width:105px;flex:1}
+.match-card-foot button{white-space:normal;line-height:1.35;justify-content:center;min-height:36px}
+.match-card .match-body{min-width:0}
+.match-card .match-title-row h3{overflow-wrap:anywhere}
+.t24-sport-tile{transition:transform .18s ease,box-shadow .18s ease}
+.t24-sport-tile:hover{transform:translateY(-3px)}
+.t24-header-account{max-width:175px;min-width:0}
+.t24-header-account span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mobile-nav{overscroll-behavior-x:contain}
+@media(max-width:1000px){
+  .t24-new-brand{gap:6px}
+  .t24-logo-emblem{width:61px;height:61px}
+  .t24-brand-wordmark{font-size:17px}
+}
+@media(max-width:800px){
+  .t24-mobile-brand{display:flex}
+  .hero-card .hero-copy{max-width:79%}
+  .t24-hero-emblem{width:130px}
+  .main-content{min-width:0}
+  .topbar{gap:8px}
+  .topbar .top-actions{margin-inline-start:auto;gap:6px}
+  .t24-header-account{max-width:115px}
+  .t24-header-account span{max-width:70px}
+  .match-card-foot{justify-content:stretch}
+  .match-card-foot .host-mini{width:100%}
+}
+@media(max-width:500px){
+  .t24-mobile-brand strong{font-size:13px}
+  .t24-mobile-brand img{width:39px;height:39px}
+  .hero-card{padding:20px 18px!important}
+  .hero-card .hero-copy{max-width:100%;width:100%}
+  .hero-card .hero-copy h2{max-width:78%}
+  .t24-hero-emblem{width:96px;position:absolute;left:0;bottom:9px;opacity:.9}
+  .topbar .breadcrumb{display:none}
+  .topbar{height:67px}
+  .topbar .top-actions{gap:5px}
+  .t24-header-account span{display:none}
+  .match-card-foot button{flex:1}
+  .t24-notifications-popover{max-height:75dvh}
+  .t24-sport-tile:active{transform:scale(.985)}
+}
+@media(prefers-reduced-motion:reduce){
+  .t24-hero-emblem,.sidebar .side-link,.t24-sport-tile{transition:none!important}
+  .hero-card:hover .t24-hero-emblem{transform:none}
+}
