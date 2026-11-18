@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Camera, CheckCircle2, ImagePlus, ShieldAlert, ShieldCheck, Trash2, XCircle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { screenImageBeforeUpload } from '../lib/imageSafety'
 
 function validateImage(file) {
   if (!file || !['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('الصورة لازم تكون JPG أو PNG أو WebP.')
@@ -52,7 +53,15 @@ export default function MediaModeration({ user, onProfileChanged }) {
     setError('');setMessage('')
     try { validateImage(file) } catch (cause) { setError(cause.message); return }
     setBusy(true)
+    setMessage('🔍 جاري الفحص الآلي للتصويرة قبل الرفع...')
     try {
+      const verdict = await screenImageBeforeUpload(file)
+      if (!verdict.allowed) {
+        setMessage('')
+        setError(verdict.reason)
+        return
+      }
+      setMessage('✅ الفحص الآلي نجح. جاري إرسال الصورة للمراجعة الخاصة...')
       const id = crypto.randomUUID()
       const storagePath = user.id + '/' + id + '.' + extFor(file)
       const { error: uploadError } = await supabase.storage.from('t24-pending').upload(storagePath,file,{contentType:file.type,upsert:false})
@@ -65,7 +74,7 @@ export default function MediaModeration({ user, onProfileChanged }) {
         throw recordError
       }
       setCaption('')
-      setMessage('الصورة وصلت، وتستنى في موافقة الإدارة. ما تظهرش للناس قبل المراجعة.')
+      setMessage('✅ الفحص الآلي نجح، والصورة وصلت للمراجعة. ما تظهرش للعامة قبل قبول الإدارة.')
       await loadMedia()
     } catch (cause) { setError(cause.message || 'تعذّر رفع الصورة.') }
     finally { setBusy(false) }
@@ -147,7 +156,7 @@ export default function MediaModeration({ user, onProfileChanged }) {
   const queue = media.filter(item=>item.status==='pending')
   const flagged = new Set(reports.map(item=>item.media_id))
   return <section className="t24-media-section">
-    <div className="section-heading"><div><span className="eyebrow">COMMUNITY SAFETY</span><h2>التصاور والمشاركة</h2><p>كل صورة جديدة تتراجع قبل النشر.</p></div></div>
+    <div className="section-heading"><div><span className="eyebrow">COMMUNITY SAFETY</span><h2>التصاور والمشاركة</h2><p>فحص آلي قبل الرفع، وبعدو موافقة الإدارة قبل النشر.</p></div></div>
     <div className="t24-upload-actions">
       <label className={'outline-button '+(busy?'t24-disabled':'')}><Camera size={17}/> بدّل تصويرة البروفيل<input type="file" hidden accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={e=>submitImage(e,'avatar')}/></label>
       <label className={'outline-button '+(busy?'t24-disabled':'')}><ImagePlus size={17}/> أضف صورة للمجتمع<input type="file" hidden accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={e=>submitImage(e,'post')}/></label>
@@ -155,7 +164,7 @@ export default function MediaModeration({ user, onProfileChanged }) {
     <label className="field-label">وصف قصير للتصويرة اللي باش تنشرها<input maxLength="500" value={caption} placeholder="مثلاً: ماتش البارح" onChange={e=>setCaption(e.target.value)}/></label>
     {error&&<p className="auth-error" role="alert">{error}</p>}
     {message&&<p className="auth-message" role="status">{message}</p>}
-    <div className="t24-moderation-note"><ShieldCheck size={18}/> التصاور ما تظهرش للناس حتى يوافق عليها المسؤول. تنجم تبلغ على أي صورة مخالفة.</div>
+    <div className="t24-moderation-note"><ShieldCheck size={18}/> التصاور تتفحص آليًا قبل الرفع وتبقى خاصة حتى يقبلها المسؤول. الفحص موش مضمون 100%، وتنجم تبلغ على المخالفات.</div>
     {mine.length>0&&<><h3>تصاوري المبعوثة</h3><div className="t24-media-grid">{mine.map(item=><div className="t24-media-card" key={item.id}>
       {item.status==='approved' ? <img src={item.approved_url} alt={item.caption||'صورة مقبولة'} loading="lazy"/> :
        item.status==='pending' && pendingPreviews[item.id] ? <img src={pendingPreviews[item.id]} alt="صورة في انتظار المراجعة" loading="lazy"/> :
