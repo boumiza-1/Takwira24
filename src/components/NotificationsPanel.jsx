@@ -3,7 +3,8 @@ import { Bell, Check, X, Users, Trophy, Clock3, CheckCheck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 // Persistent private in-app inbox; notifications survive logouts and are refreshed live.
-export default function NotificationsPanel({ user, onOpenMatch, onAcceptInvite, onDecideRequest, onDecideChallenge, onRefresh }) {
+export default function NotificationsPanel({ user, onOpenMatch, onAcceptInvite, onDecideRequest, onDecideChallenge, onRefresh,lang='ar' }) {
+  const t=(ar,fr)=>lang==='fr'?fr:ar
   const [open,setOpen]=useState(false)
   const [items,setItems]=useState([])
   const [busy,setBusy]=useState(false)
@@ -50,24 +51,24 @@ export default function NotificationsPanel({ user, onOpenMatch, onAcceptInvite, 
     }catch(cause){setError(cause?.message||'ما نجّمش نكمل العملية.')}
     finally{setBusy(false)}
   }
-  return <div className="t24-notification-root" dir="rtl">
-    <button type="button" className="t24-notification-trigger" aria-label="الإشعارات" title="الإشعارات" onClick={()=>{setOpen(v=>!v);if(!open)reload()}}>
+  return <div className="t24-notification-root" dir={lang==='fr'?'ltr':'rtl'}>
+    <button type="button" className="t24-notification-trigger" aria-label={t('الإشعارات','Notifications')} title={t('الإشعارات','Notifications')} onClick={()=>{setOpen(v=>!v);if(!open)reload()}}>
       <Bell size={20}/>{unread>0&&<span>{unread>99?'99+':unread}</span>}
     </button>
     {open&&<div className="t24-notifications-popover">
-      <div className="t24-notifications-top"><div><small>TAKWIRA24</small><h3>🔔 الإشعارات {unread>0&&'('+unread+')'}</h3></div><button type="button" aria-label="إغلاق" onClick={()=>setOpen(false)}><X size={18}/></button></div>
-      <div className="t24-notifications-tools"><span>دعوات الماتش، طلبات الفرق والتحدّيات</span><button type="button" onClick={allRead} disabled={!unread}>قرأت الكل <CheckCheck size={15}/></button></div>
+      <div className="t24-notifications-top"><div><small>TAKWIRA24</small><h3>🔔 {t('الإشعارات','Notifications')} {unread>0&&'('+unread+')'}</h3></div><button type="button" aria-label="إغلاق" onClick={()=>setOpen(false)}><X size={18}/></button></div>
+      <div className="t24-notifications-tools"><span>{t('دعوات الماتش، طلبات الفرق والتحدّيات','Invitations, demandes d’équipe et défis')}</span><button type="button" onClick={allRead} disabled={!unread}>{t('قرأت الكل','Tout marquer comme lu')} <CheckCheck size={15}/></button></div>
       {error&&<div role="alert" className="auth-error">{error}</div>}
       <div className="t24-notifications-list">
-        {items.length===0&&<div className="t24-empty"><Bell size={23}/> ما عندكش إشعارات توا</div>}
+        {items.length===0&&<div className="t24-empty"><Bell size={23}/> {t('ما عندكش إشعارات توا','Aucune notification pour le moment')}</div>}
         {items.map(n=><article key={n.id} className={'t24-notice '+(!n.read_at?'t24-notice-new':'')}>
           <div className="t24-notice-icon">{n.kind.includes('challenge')?'⚔️':n.kind.includes('team')?'👥':'⚽'}</div>
-          <div className="t24-notice-content"><strong>{n.title}</strong><p>{n.body}</p><small>{new Date(n.created_at).toLocaleString('fr-TN',{dateStyle:'short',timeStyle:'short'})}</small>
+          <div className="t24-notice-content"><strong>{lang==='fr'?({invitation:'Invitation à un match ⚽',invitation_accepted:'Invitation acceptée ✅',invitation_declined:'Invitation refusée ❌',team_request:'Un joueur veut rejoindre votre équipe',team_request_accepted:'Demande acceptée ✅',team_request_declined:'Demande refusée',challenge:'Nouveau défi ⚔️',challenge_accepted:'Défi accepté',challenge_declined:'Défi refusé',match_completed:'Match terminé — votes ouverts ⭐',match_postponed:'Match reporté 🗓️'}[n.kind]||n.title):n.title}</strong><p>{lang==='fr'?({invitation:'Ton capitaine t’invite à jouer. Réponds ici.',team_request:'Un joueur veut rejoindre ton équipe.',match_completed:'Le résultat est publié ! Tu peux noter les autres joueurs du match.',match_postponed:'Le match a été reporté.'}[n.kind]||'Mise à jour de ton match.'):n.body}</p><small>{new Date(n.created_at).toLocaleString('fr-TN',{dateStyle:'short',timeStyle:'short'})}</small>
             {['invitation','team_request','challenge'].includes(n.kind)&&<div className="t24-notice-actions">
-              <button type="button" disabled={busy} onClick={()=>action(n,n.kind,true)}><Check size={14}/> قبول</button>
-              <button type="button" disabled={busy} onClick={()=>action(n,n.kind,false)}><X size={14}/> رفض</button>
+              <button type="button" disabled={busy} onClick={()=>action(n,n.kind,true)}><Check size={14}/> {t('قبول','Accepter')}</button>
+              <button type="button" disabled={busy} onClick={()=>action(n,n.kind,false)}><X size={14}/> {t('رفض','Refuser')}</button>
             </div>}
-            <button type="button" className="t24-notice-link" onClick={()=>{markRead(n);onOpenMatch?.(n.match_id);setOpen(false)}}>شوف الماتش</button>
+            <button type="button" className="t24-notice-link" onClick={()=>{markRead(n);onOpenMatch?.(n.match_id);setOpen(false)}}>{t('شوف الماتش','Voir le match')}</button>
           </div>
           {!n.read_at&&<i className="t24-unread-dot"/>}
         </article>)}
