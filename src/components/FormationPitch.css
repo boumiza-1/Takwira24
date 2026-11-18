@@ -52,3 +52,15 @@
 .tf-handball .tf-stadium-edge{color:#efd4a6}
 @media(max-width:600px){.tf-stadium{padding:9px 8px 7px}.tf-lawn{height:500px}.tf-slot{width:49px}.tf-player-circle{width:36px;height:36px}.tf-player-name{font-size:9px}.tf-bench-title{flex-wrap:wrap}.tf-bench-title small{width:100%}.tf-headline h3{font-size:19px}}
 @media(max-width:395px){.tf-lawn{height:460px}.tf-slot{width:42px}.tf-player-circle{width:31px;height:31px}.tf-player-name{font-size:8px}.tf-bench{padding:9px}.tf-bench-player{width:51px}.tf-bench-avatar{width:32px;height:32px}}
+
+
+/* User's own top-down pitch reference as the actual playable mat.
+   Existing markings remain as a responsive fallback if the asset fails. */
+.tf-football .tf-lawn{
+  background:
+    linear-gradient(0deg,#0b4e2814,#0b4e2814),
+    url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JJJQx7uBtP724OZ2KWNMaPLMsw/d032515f-ee93-42a7-b4c8-10b5be82ec90.png") center/100% 100% no-repeat,
+    repeating-linear-gradient(0deg,#207e44 0%,#207e44 9%,#268a4c 9%,#268a4c 18%);
+}
+.tf-football .tf-mark{opacity:.26}
+.tf-football .tf-stadium{background-image:linear-gradient(#102b2077,#112f2277),url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JJJQx7uBtP724OZ2KWNMaPLMsw/84272c46-75d6-40b9-8b0e-f00460e8cae9.png");background-size:cover;background-position:center}
