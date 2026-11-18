@@ -280,3 +280,67 @@ input,textarea,select{max-width:100%;min-width:0}
  input,textarea,select{font-size:16px!important}
  button,input,select,textarea{touch-action:manipulation}
 }
+
+
+/* TAKWIRA24 Premium 2026 — elevated sports UI and bilingual typography */
+:root{
+  --t24-ink:#133322; --t24-deep:#09261b; --t24-accent:#bded76; --t24-accent-deep:#83be47;
+  --t24-outline:#dce9dc; --t24-panel:#fff; --t24-muted:#657969;
+}
+html:lang(fr) body,html:lang(fr) button,html:lang(fr) input,html:lang(fr) select,html:lang(fr) textarea{
+  font-family:'DM Sans',Arial,sans-serif!important;
+}
+html:lang(fr) .main-content,html:lang(fr) .sidebar{
+  direction:ltr;
+}
+html:lang(ar) button,html:lang(ar) input,html:lang(ar) select,html:lang(ar) textarea{
+  font-family:'Tajawal',Arial,sans-serif;
+}
+body{background:linear-gradient(180deg,#ebf4e9 0%,#f8fbf7 470px,#f2f7f1 100%)}
+.app-shell{min-height:100dvh}
+.main-content{background:transparent}
+.topbar{backdrop-filter:blur(14px);background:#ffffffed!important;position:sticky;top:0;z-index:100;border-bottom:1px solid #e4eddf;box-shadow:0 4px 30px #173f2414}
+.main-content h1,.main-content h2,.main-content h3{letter-spacing:-.4px;font-weight:900}
+.main-content p{line-height:1.7}
+.hero-card{border:1px solid #a6c38d!important;box-shadow:0 21px 55px #0d2c1b38!important}
+.t24-sport-tile{border:1px solid #d3e4d3}
+.player-card,.match-card,.stat-card{border:1px solid #e0eae0!important;box-shadow:0 10px 26px #10332011!important;transition:transform .2s,box-shadow .2s}
+.player-card:hover,.match-card:hover,.stat-card:hover{transform:translateY(-3px);box-shadow:0 16px 32px #153a241f!important}
+.primary-button{background:linear-gradient(130deg,#d4ff85,#b6ed70)!important;border:1px solid #a6d965!important;color:#173820!important;font-weight:900!important;box-shadow:0 6px 17px #92c95931}
+.primary-button:hover{filter:brightness(.97)}
+.outline-button{border-color:#bfd7b7!important;background:#f9fdf6!important;color:#2a6037!important;font-weight:800!important}
+.page-intro,.welcome-row{padding-block:7px 10px}
+.eyebrow{letter-spacing:1px;font-size:10px;font-weight:900;color:#648c46}
+.t24-lang-toggle{display:flex;align-items:center;gap:3px;padding:4px;background:#edf5e8;border:1px solid #dbead6;border-radius:12px;flex-shrink:0}
+.t24-lang-toggle button{background:transparent;color:#648061;border:0;border-radius:9px;padding:6px 9px;white-space:nowrap;font:900 11px 'DM Sans',sans-serif;min-width:34px;cursor:pointer}
+.t24-lang-toggle button.chosen{background:#c5f289;color:#214630;box-shadow:0 2px 8px #24472122}
+.t24-season-profile{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:linear-gradient(110deg,#153b2b,#355d32);padding:18px 21px;border-radius:17px;margin:17px 0;color:#fff;box-shadow:0 11px 24px #0c35232d}
+.t24-season-profile>div{flex:1}
+.t24-season-profile>div>span{font:900 10px 'DM Sans',sans-serif;color:#d0f4a9;letter-spacing:1px}
+.t24-season-profile h3{color:#fff;margin:5px 0 0;font-size:17px}
+.t24-season-profile>strong{font:900 23px 'DM Sans',sans-serif;color:#ffdf77;background:#ffffff1b;border:1px solid #ffffff24;border-radius:12px;padding:7px 13px}
+.t24-season-profile>small{font-size:11px;color:#d3eacb}
+.t24-player-rating-mini{display:flex;align-items:center;gap:5px;color:#b08024!important;font:900 11px 'DM Sans',sans-serif}
+.t24-captain-self-pick{margin:13px 0}
+.t24-captain-self-pick button{padding:12px 17px}
+.t24-public-rating-hero{margin:2px 20px 17px;background:radial-gradient(circle at 90% 0,#cfe67533,transparent 45%),linear-gradient(115deg,#122b22,#295239);color:#f8fff3;border-radius:16px;padding:15px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;box-shadow:0 12px 24px #0b321c30}
+.t24-public-rating-hero>div:first-child{display:flex;flex-direction:column;gap:6px}
+.t24-public-rating-hero small{font:900 10px 'DM Sans',sans-serif;color:#b9f17b;letter-spacing:.5px}
+.t24-public-rating-hero strong{font:900 34px 'DM Sans',sans-serif;color:#ffe581}
+.t24-public-rating-hero strong span{font-size:16px;color:#c7e5b9}
+.t24-public-rating-hero p{font-size:11px;color:#e0f4e3;margin:0}
+.t24-public-star-line{display:flex;gap:5px}
+.t24-review-remove{border:0;border-radius:8px;background:#ffe5e0;color:#a63536;display:flex;gap:5px;align-items:center;padding:8px 11px;font-size:11px;font-weight:900;cursor:pointer}
+.t24-review-approve{border:0;border-radius:8px;background:#d7f3c5;color:#245d35;display:flex;gap:5px;align-items:center;padding:8px 11px;font-size:11px;font-weight:900;cursor:pointer}
+.t24-media-card{box-shadow:0 6px 18px #132f1a12}
+.t24-media-card img{aspect-ratio:1;object-fit:cover}
+input:focus-visible,button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #91bc5a88;outline-offset:2px}
+@media(max-width:700px){
+ .topbar .top-actions{gap:6px}
+ .t24-lang-toggle{padding:3px;gap:0}
+ .t24-lang-toggle button{padding:6px 7px;font-size:10px}
+ .topbar .t24-header-account span{max-width:62px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .hero-copy h2{font-size:clamp(24px,6.5vw,37px)}
+ .t24-season-profile{padding:14px}
+ .t24-public-rating-hero{margin:0 12px 12px}
+}
