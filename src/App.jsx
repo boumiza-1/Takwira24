@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Activity, ArrowLeft, Bell, CalendarDays, CheckCircle2, CirclePlus, Compass, ImagePlus, LogOut, MapPin, Plus, Search, Settings2, ShieldCheck, Trophy, Users, X, UserRound, Clock3, Camera, Pencil, RefreshCw } from 'lucide-react'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
 import AuthModal from './components/AuthModal'
+import MediaModeration from './components/MediaModeration'
 import './app-mobile.css'
 
 const sports = {
@@ -165,25 +166,6 @@ export default function App() {
     finally { setBusy(false) }
   }
 
-  async function uploadAvatar(event) {
-    const file = event.target.files?.[0]
-    if (!file || !user) return
-    if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 3*1024*1024) {
-      notice('اختار JPG أو PNG أو WebP أقل من 3MB'); return
-    }
-    setBusy(true)
-    try {
-      const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
-      const path = user.id + '/avatar-' + Date.now() + '.' + ext
-      const { error: uploadError } = await supabase.storage.from('t24-avatars').upload(path, file, { contentType: file.type, upsert: false })
-      if (uploadError) throw uploadError
-      const { data } = supabase.storage.from('t24-avatars').getPublicUrl(path)
-      setDraft(prev => ({ ...prev, avatar_url: data.publicUrl }))
-      notice('التصويرة تحمّلت، إضغط حفظ الملف')
-    } catch (cause) { notice('مشكلة تحميل التصويرة: ' + cause.message) }
-    finally { setBusy(false) }
-  }
-
   function freePitchSlot(matchId) {
     const occupied = lineup.filter(l => l.match_id === matchId && l.status !== 'declined')
     for (const team of ['A','B']) {
@@ -321,10 +303,10 @@ export default function App() {
       {activeTab==='players'&&<><section className="page-intro"><span className="eyebrow">PLAYERS</span><h1>لاعبين Takwira24</h1><p>هوني يظهروا الحسابات الحقيقية، موش أسامي تجريبية.</p></section><label className="search-box wide-search"><Search size={17}/><input placeholder="إبحث على لاعب..." value={query} onChange={e=>setQuery(e.target.value)}/></label>{!user?<div className="t24-empty">سجّل الدخول باش تشوف اللاعبين.</div>:<div className="player-grid">{players.filter(p=>p.display_name.toLowerCase().includes(query.toLowerCase())).map(p=><div className="player-card" key={p.id}><Avatar name={p.display_name} url={p.avatar_url}/><div><strong>{p.display_name}</strong><small>{p.city || 'تونس'} · {p.position || sports[p.sport]?.label}</small></div><button className="outline-button" onClick={()=>{setActiveTab('matches');notice('اختار ماتش من ماتشاتك وافتح التشكيلة باش تدعّي اللاعب')}}>دعوة</button></div>)}</div>}</>}
 
       {activeTab==='profile'&&<><section className="profile-cover"><div className="profile-cover-pattern"/><span>MY PLAYER PROFILE</span></section>{!user?<div className="t24-empty">إعمل حساب باش تعمل بطاقة لاعب متاعك.<button className="primary-button" onClick={()=>setAuthOpen(true)}>إنشاء حساب / دخول</button></div>:
-        <><div className="profile-head"><Avatar name={displayName} url={profile?.avatar_url}/><div><h1>{displayName} <ShieldCheck size={17}/></h1><p>{user.email || 'Facebook account'} · {profile?.city || 'تونس'}</p><div className="profile-tags"><span>{profile?.position || 'لاعب'}</span><span>{sports[profile?.sport]?.label || 'Foot'}</span></div></div><button className="outline-button" onClick={openProfileEditor}><Pencil size={16}/> تعديل الملف</button></div>
+        <><div className="profile-head"><Avatar name={displayName} url={profile?.avatar_url}/><div><h1>{displayName} <ShieldCheck size={17}/></h1><p>{user.email || user.phone || 'حساب لاعب'} · {profile?.city || 'تونس'}</p><div className="profile-tags"><span>{profile?.position || 'لاعب'}</span><span>{sports[profile?.sport]?.label || 'Foot'}</span></div></div><button className="outline-button" onClick={openProfileEditor}><Pencil size={16}/> تعديل الملف</button></div>
         <div className="profile-bio"><span className="bio-sport-icon">{sports[profile?.sport]?.icon || '⚽'}</span><p>{profile?.bio || 'أضف نبذة على روحك الرياضية.'}</p></div>
         <div className="profile-stats"><div><strong>{lineup.filter(l=>l.player_id===user.id&&l.status==='confirmed').length}</strong><small>ماتش شاركت فيه</small></div><div><strong>{matches.filter(m=>m.host_id===user.id).length}</strong><small>ماتش نظّمتو</small></div></div>
-        <button className="outline-button" onClick={openProfileEditor}><ImagePlus size={16}/> إضافة / تغيير صورة الـProfile</button></>}</>}
+        <MediaModeration user={user} onProfileChanged={()=>refreshData(user)}/></>}</>}
       <footer className="footer"><span>© 2026 Takwira24</span><span>اللعبة تجمعنا 💚</span><span>{isSupabaseConfigured?'SUPABASE':'CONFIGURATION REQUIRED'}</span></footer>
     </main>
 
@@ -333,7 +315,7 @@ export default function App() {
 
     {newMatchOpen&&<div className="modal-backdrop" onMouseDown={e=>e.target===e.currentTarget&&setNewMatchOpen(false)}><form className="create-modal" onSubmit={createMatch}><div className="modal-head"><div><span className="eyebrow">CREATE MATCH</span><h2>كوّن الماتش متاعك</h2></div><button type="button" className="icon-button" onClick={()=>setNewMatchOpen(false)}><X/></button></div><label className="field-label">الرياضة<select value={form.sport} onChange={e=>setForm({...form,sport:e.target.value})}>{Object.entries(sports).map(([id,s])=><option key={id} value={id}>{s.label}</option>)}</select></label><label className="field-label">إسم الماتش<input value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="ماتش صحاب الجمعة"/></label><div className="form-two"><label className="field-label">الملعب<input required value={form.venue} onChange={e=>setForm({...form,venue:e.target.value})}/></label><label className="field-label">المدينة<input required value={form.area} onChange={e=>setForm({...form,area:e.target.value})}/></label></div><div className="form-two"><label className="field-label">التاريخ<input type="date" required value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></label><label className="field-label">الساعة<input type="time" required value={form.time} onChange={e=>setForm({...form,time:e.target.value})}/></label></div><div className="form-two"><label className="field-label">عدد اللاعبين<select value={form.total} onChange={e=>setForm({...form,total:+e.target.value})}>{[6,10,12,14,18,22].map(n=><option key={n} value={n}>{n} لاعبين</option>)}</select></label><label className="field-label">المستوى<select value={form.skill_level} onChange={e=>setForm({...form,skill_level:e.target.value})}>{['مفتوح','مبتدئ','متوسط','متقدم'].map(s=><option key={s}>{s}</option>)}</select></label></div><button className="primary-button submit-match" disabled={busy}><CirclePlus size={18}/> {busy?'جاري الحفظ':'إنشاء الماتش'}</button></form></div>}
 
-    {editProfileOpen&&<div className="modal-backdrop" onMouseDown={e=>e.target===e.currentTarget&&setEditProfileOpen(false)}><form className="create-modal profile-editor" onSubmit={saveProfile}><div className="modal-head"><div><span className="eyebrow">PLAYER PROFILE</span><h2>بطاقة اللاعب</h2></div><button type="button" className="icon-button" onClick={()=>setEditProfileOpen(false)}><X/></button></div><div className="t24-avatar-upload"><Avatar name={draft.display_name} url={draft.avatar_url}/><label className="outline-button"><Camera size={16}/> غيّر التصويرة<input type="file" accept="image/jpeg,image/png,image/webp" onChange={uploadAvatar} hidden /></label></div><label className="field-label">الإسم<input required value={draft.display_name||''} onChange={e=>setDraft({...draft,display_name:e.target.value})}/></label><div className="form-two"><label className="field-label">المدينة<input value={draft.city||''} onChange={e=>setDraft({...draft,city:e.target.value})}/></label><label className="field-label">المركز<input value={draft.position||''} onChange={e=>setDraft({...draft,position:e.target.value})}/></label></div><label className="field-label">الرياضة<select value={draft.sport||'football'} onChange={e=>setDraft({...draft,sport:e.target.value})}>{Object.entries(sports).map(([id,s])=><option key={id} value={id}>{s.label}</option>)}</select></label><label className="field-label">نبذة عليك<textarea rows="3" value={draft.bio||''} onChange={e=>setDraft({...draft,bio:e.target.value})}/></label><button className="primary-button submit-match" disabled={busy}><CheckCircle2 size={18}/> حفظ الملف</button></form></div>}
+    {editProfileOpen&&<div className="modal-backdrop" onMouseDown={e=>e.target===e.currentTarget&&setEditProfileOpen(false)}><form className="create-modal profile-editor" onSubmit={saveProfile}><div className="modal-head"><div><span className="eyebrow">PLAYER PROFILE</span><h2>بطاقة اللاعب</h2></div><button type="button" className="icon-button" onClick={()=>setEditProfileOpen(false)}><X/></button></div><div className="t24-avatar-upload"><Avatar name={draft.display_name} url={profile?.avatar_url}/><small>رفع التصويرة يتمّ من قسم المراجعة في ملفك، وما تظهر كان بعد موافقة الإدارة.</small></div><label className="field-label">الإسم<input required value={draft.display_name||''} onChange={e=>setDraft({...draft,display_name:e.target.value})}/></label><div className="form-two"><label className="field-label">المدينة<input value={draft.city||''} onChange={e=>setDraft({...draft,city:e.target.value})}/></label><label className="field-label">المركز<input value={draft.position||''} onChange={e=>setDraft({...draft,position:e.target.value})}/></label></div><label className="field-label">الرياضة<select value={draft.sport||'football'} onChange={e=>setDraft({...draft,sport:e.target.value})}>{Object.entries(sports).map(([id,s])=><option key={id} value={id}>{s.label}</option>)}</select></label><label className="field-label">نبذة عليك<textarea rows="3" value={draft.bio||''} onChange={e=>setDraft({...draft,bio:e.target.value})}/></label><button className="primary-button submit-match" disabled={busy}><CheckCircle2 size={18}/> حفظ الملف</button></form></div>}
 
     {currentMatch&&<div className="modal-backdrop" onMouseDown={e=>e.target===e.currentTarget&&setSelectedMatch(null)}><div className="create-modal t24-lineup-modal"><div className="modal-head"><div><span className="eyebrow">MATCH LINEUP</span><h2>{currentMatch.title}</h2><p>{currentMatch.venue} · {currentMatch.area} · {prettyDate(currentMatch.starts_at)}</p></div><button className="icon-button" onClick={()=>setSelectedMatch(null)}><X/></button></div>
       <div className="t24-field"><div className="t24-center-line"/><div className="t24-center-circle"/>{['A','B'].map(team=><div className="t24-team" key={team}><strong>فريق {team}</strong><div className="t24-squad">{participants.filter(e=>e.team===team&&e.status==='confirmed').map(entry=><div className="t24-squad-player" key={entry.id}><Avatar small name={nameOf(entry.player_id)} url={avatarOf(entry.player_id)}/><span>{nameOf(entry.player_id)}</span></div>)}</div></div>)}</div>
