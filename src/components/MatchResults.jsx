@@ -39,7 +39,7 @@ export default function MatchResults({match,entries=[],players=[],user,lang='ar'
   const mvp=rated.find(r=>r.count>0)
   const reload=useCallback(async()=>{
     if(!match?.id||!user)return
-    const {data,error:voteError}=await supabase.from('t24_votes').select('*').eq('match_id',match.id).limit(400)
+    const {data,error:voteError}=await supabase.from('t24_votes').select('*').eq('match_id',match.id).limit(1000)
     if(voteError){setError(voteError.message);return}
     setVotes(data||[])
   },[match?.id,user?.id])
