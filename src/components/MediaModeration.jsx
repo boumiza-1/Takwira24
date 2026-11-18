@@ -95,6 +95,10 @@ export default function MediaModeration({ user, onProfileChanged }) {
         setMessage('تمّت الموافقة، والصورة تنجم تظهر للناس.')
       } else {
         if (item.status === 'approved') {
+          // Remove public bytes first: never report successful takedown while a public URL still serves the file.
+          const removalPath = item.owner_id + '/' + item.id + '.' + item.storage_path.split('.').pop()
+          const { error: removalError } = await supabase.storage.from('t24-approved').remove([removalPath])
+          if (removalError) throw removalError
           if (item.kind === 'avatar') {
             // Clear only when this is the picture currently shown on that profile.
             const { data: profile } = await supabase.from('t24_profiles').select('avatar_url').eq('id',item.owner_id).maybeSingle()
@@ -108,11 +112,6 @@ export default function MediaModeration({ user, onProfileChanged }) {
           status:'rejected',approved_url:null,reviewed_by:user.id,reviewed_at:new Date().toISOString(),review_reason:reason.trim()||'الصورة تخالف شروط النشر'
         }).eq('id',item.id)
         if (rejectError) throw rejectError
-        if (item.status==='approved' && item.approved_url) {
-          // Published filenames are stored as owner-id / media-id.ext.
-          const path = item.owner_id + '/' + item.id + '.' + item.storage_path.split('.').pop()
-          await supabase.storage.from('t24-approved').remove([path])
-        }
         setMessage('الصورة ترفضت، وما عادش تظهر في التطبيق.')
       }
       if (item.status==='pending') await supabase.storage.from('t24-pending').remove([item.storage_path])
