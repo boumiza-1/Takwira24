@@ -5,6 +5,8 @@ import AuthModal from './components/AuthModal'
 import MediaModeration from './components/MediaModeration'
 import FormationPitch from './components/FormationPitch'
 import PlayerSearchModal from './components/PlayerSearchModal'
+import PlayerProfileModal from './components/PlayerProfileModal'
+import NotificationsPanel from './components/NotificationsPanel'
 import './app-mobile.css'
 
 const sports = {
@@ -36,6 +38,8 @@ export default function App() {
   const [selectedMatch, setSelectedMatch] = useState(null)
   const [targetSlot, setTargetSlot] = useState(null)
   const [challenges, setChallenges] = useState([])
+  const [joinRequests,setJoinRequests] = useState([])
+  const [viewedPlayer,setViewedPlayer] = useState(null)
   const [activeTab, setActiveTab] = useState('home')
   const [sport, setSport] = useState('all')
   const [query, setQuery] = useState('')
@@ -92,20 +96,22 @@ export default function App() {
     try {
       const own = await ensureProfile(current)
       setProfile(own)
-      const [peopleResult, gamesResult, lineupResult, challengesResult] = await Promise.all([
+      const [peopleResult, gamesResult, lineupResult, challengesResult, joinRequestsResult] = await Promise.all([
         supabase.from('t24_profiles').select('*').order('created_at', { ascending: false }).limit(200),
         supabase.from('t24_matches').select('*').order('starts_at', { ascending: true, nullsFirst: false }).limit(150),
         supabase.from('t24_lineup').select('*').limit(500),
-        supabase.from('t24_challenges').select('*').order('created_at',{ascending:false}).limit(200)
+        supabase.from('t24_challenges').select('*').order('created_at',{ascending:false}).limit(200),
+        supabase.from('t24_team_requests').select('*').order('created_at',{ascending:false}).limit(250)
       ])
-      for (const item of [peopleResult, gamesResult, lineupResult, challengesResult]) if (item.error) throw item.error
+      for (const item of [peopleResult, gamesResult, lineupResult, challengesResult, joinRequestsResult]) if (item.error) throw item.error
       // Include every captain/invited player even if outside the latest 200 public profiles.
       // Without this, searched players could appear as anonymous placeholders on other devices.
       const people = peopleResult.data || []
       const allIds = [...new Set([
         current.id, ...(gamesResult.data || []).flatMap(m=>[m.host_id,m.opponent_id]),
         ...(lineupResult.data || []).map(row=>row.player_id),
-        ...(challengesResult.data || []).map(row=>row.challenger_id)
+        ...(challengesResult.data || []).map(row=>row.challenger_id),
+        ...(joinRequestsResult.data || []).map(row=>row.player_id)
       ].filter(Boolean))]
       const notLoaded = allIds.filter(id=>!people.some(p=>p.id===id))
       const batches=[]
@@ -116,13 +122,14 @@ export default function App() {
       setMatches(gamesResult.data || [])
       setLineup(lineupResult.data || [])
       setChallenges(challengesResult.data || [])
+      setJoinRequests(joinRequestsResult.data||[])
     } catch (cause) {
       setError(cause.message || 'صار مشكل في الاتصال بقاعدة البيانات.')
     } finally { setLoading(false) }
   }
   useEffect(() => {
     if (user) { setError(''); refreshData(user) }
-    else { setProfile(null); setPlayers([]); setMatches([]); setLineup([]); setChallenges([]); setSelectedMatch(null) }
+    else { setProfile(null); setPlayers([]); setMatches([]); setLineup([]); setChallenges([]); setJoinRequests([]); setSelectedMatch(null); setViewedPlayer(null) }
   }, [user?.id])
 
   useEffect(() => {
@@ -132,6 +139,7 @@ export default function App() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 't24_lineup' }, () => refreshData(user))
       .on('postgres_changes', { event: '*', schema: 'public', table: 't24_profiles' }, () => refreshData(user))
       .on('postgres_changes', { event: '*', schema: 'public', table: 't24_challenges' }, () => refreshData(user))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 't24_team_requests' }, () => refreshData(user))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [user?.id])
@@ -208,6 +216,77 @@ export default function App() {
       notice('إنت مسؤول فريق B. إضغط على بلاصة في فريقك ودعّي أصحابك.')
     } else {
       notice(match.opponent_id ? 'الماتش عندو زوز مسؤولين. يلزم مسؤول الفريق يدعّيك.' : 'إبعث طلب تحدّي باش تولّي مسؤول فريق B، وبعد القبول كوّن فريقك.')
+    }
+  }
+
+
+  // Player asks to join a specific existing team; captain decides who receives a spot.
+  async function requestToJoinTeam(match,team) {
+    if(!requireLogin())return
+    if(match.host_id===user.id || match.opponent_id===user.id){
+      notice('إنت مسؤول على فريق في الماتش هذا.');return
+    }
+    if(team==='B'&&!match.opponent_id){notice('Team B مازال ما عندوش مسؤول.');return}
+    if(lineup.some(l=>l.match_id===match.id&&l.player_id===user.id)){
+      notice('إنت عندك بلاصة أو دعوة موجودة في الماتش.');return
+    }
+    const old=joinRequests.find(q=>q.match_id===match.id&&q.player_id===user.id)
+    if(old){notice(old.status==='pending'?'طلبك مازال يستنّى المسؤول':'عندك طلب سابق للماتش هذا.');return}
+    setBusy(true)
+    try{
+      await ensureProfile(user)
+      const {error:requestError}=await supabase.from('t24_team_requests')
+        .insert({match_id:match.id,player_id:user.id,team,status:'pending'})
+      if(requestError)throw requestError
+      await refreshData(user)
+      notice('طلب اللعب في Team '+team+' تبعث للمسؤول. باش توصلك الإجابة في الإشعارات.')
+    }catch(cause){notice('تعذّر بعث طلب الانضمام: '+cause.message)}
+    finally{setBusy(false)}
+  }
+
+  async function decideTeamRequest(request,accept) {
+    if(!user)throw Error('Login required')
+    setBusy(true)
+    try{
+      const {data,error:decisionError}=await supabase.from('t24_team_requests')
+        .update({status:accept?'accepted':'declined'})
+        .eq('id',request.id).eq('status','pending')
+        .select('id').maybeSingle()
+      if(decisionError)throw decisionError
+      if(!data)throw Error('الطلب تقبل/ترفض قبل، أو الصلاحية موش متاحة.')
+      await refreshData(user)
+      notice(accept?'قبلت اللاعب، تضاف آليًا لأوّل مركز فارغ في الفريق ✅':'ترفض طلب الانضمام ❌')
+    }finally{setBusy(false)}
+  }
+
+  async function notificationAction(notification,accept) {
+    if(!user)return
+    if(notification.kind==='invitation'){
+      // Use fresh row rather than a potentially stale in-memory invitation.
+      const {data,error:lookupError}=await supabase.from('t24_lineup').select('*')
+        .eq('match_id',notification.match_id).eq('player_id',user.id).eq('status','invited').maybeSingle()
+      if(lookupError)throw lookupError
+      if(!data)throw Error('الدعوة هاذي تمّ الردّ عليها أو تنحّات.')
+      await respondInvite(data,accept)
+      return
+    }
+    if(notification.kind==='team_request'){
+      const {data,error:lookupError}=await supabase.from('t24_team_requests').select('*')
+        .eq('match_id',notification.match_id).eq('status','pending')
+        .order('created_at',{ascending:true})
+      if(lookupError)throw lookupError
+      const candidate=(data||[]).find(q=>(q.team==='A'&&matches.find(m=>m.id===q.match_id)?.host_id===user.id)
+        ||(q.team==='B'&&matches.find(m=>m.id===q.match_id)?.opponent_id===user.id))
+      if(!candidate)throw Error('افتح الماتش وشوف الطلبات الجديدة باش تختار اللاعب.')
+      await decideTeamRequest(candidate,accept)
+      return
+    }
+    if(notification.kind==='challenge'){
+      const {data,error:lookupError}=await supabase.from('t24_challenges').select('*')
+        .eq('match_id',notification.match_id).eq('status','pending').order('created_at',{ascending:true})
+      if(lookupError)throw lookupError
+      if(!(data||[]).length)throw Error('ما عادش فما تحدّي معلّق.')
+      await respondChallenge(data[0],accept)
     }
   }
 
@@ -316,6 +395,8 @@ export default function App() {
   const nameOf = id => findPlayer(id)?.display_name || 'لاعب'
   const ownInvitations = lineup.filter(l => l.player_id === user?.id && l.status === 'invited')
   const ownChallenges = challenges.filter(c=>c.challenger_id===user?.id)
+  const ownJoinRequests=joinRequests.filter(q=>q.player_id===user?.id)
+  const activeTeamRequests=joinRequests.filter(q=>q.match_id===selectedMatch&&q.status==='pending')
   const currentChallenges = challenges.filter(c=>c.match_id===selectedMatch)
   const canManageTeam = (game,team)=>Boolean(user&&game&&((team==='A'&&game.host_id===user.id)||(team==='B'&&game.opponent_id===user.id)))
 
@@ -337,6 +418,11 @@ export default function App() {
         <div className="mobile-brand"><span className="brand-mark">⚽</span> takwira<span className="brand-24">24</span></div>
         <div className="breadcrumb">الرئيسية / <b>{activeTab==='home'?'اكتشف الماتشات':activeTab==='players'?'اللاعبين':activeTab==='profile'?'حسابي':'مبارياتي'}</b></div>
         <div className="top-actions">
+          <NotificationsPanel user={user} onRefresh={()=>refreshData(user)}
+            onOpenMatch={matchId=>{setSelectedMatch(matchId);setActiveTab('matches')}}
+            onAcceptInvite={(notification,accept)=>notificationAction(notification,accept)}
+            onDecideRequest={(notification,accept)=>notificationAction(notification,accept)}
+            onDecideChallenge={(notification,accept)=>notificationAction(notification,accept)}/>
           {user ? <><button className="t24-header-account" onClick={()=>setActiveTab('profile')}><Avatar name={displayName} url={profile?.avatar_url} small/><span>{displayName}</span></button><button className="icon-button" title="خروج" onClick={()=>supabase.auth.signOut()}><LogOut size={19}/></button></> :
             <button className="t24-login-button" onClick={()=>setAuthOpen(true)}>دخول / حساب جديد</button>}
         </div>
@@ -367,21 +453,26 @@ export default function App() {
             <div className={'match-visual visual-'+sports[m.sport]?.tint}><div className="visual-top"><span className="match-sport">{sports[m.sport]?.icon} {sports[m.sport]?.label}</span><span className="match-open">{m.status==='open'?'مفتوح':m.status}</span></div><div className="visual-ball">{sports[m.sport]?.icon}</div></div>
             <div className="match-body"><div className="match-title-row"><h3>{m.title}</h3><span className="match-date">{prettyDate(m.starts_at)}</span></div><div className="match-detail"><MapPin size={15}/>{m.venue} · {m.area}</div><div className="match-detail"><Clock3 size={15}/>{prettyTime(m.starts_at)}</div>
               <div className="players-progress"><div className="progress-label"><span>اللاعبين</span><strong>{lineup.filter(l=>l.match_id===m.id&&l.status==='confirmed').length}/{m.total_players}</strong></div><div className="progress-track"><i style={{width:Math.min(100,lineup.filter(l=>l.match_id===m.id&&l.status==='confirmed').length/m.total_players*100)+'%'}}/></div></div>
-              <div className="match-card-foot"><div className="host-mini"><Avatar small name={nameOf(m.host_id)} url={avatarOf(m.host_id)}/><span>{nameOf(m.host_id)}</span></div><button onClick={()=>setSelectedMatch(m.id)}>التيران / التفاصيل</button>{!m.opponent_id && m.host_id!==user?.id && <button onClick={()=>requestChallenge(m)} disabled={busy||ownChallenges.some(c=>c.match_id===m.id&&c.status==='pending')}>{ownChallenges.some(c=>c.match_id===m.id&&c.status==='pending')?'طلبك قيد الانتظار':'⚔️ نطلب تحدّي'}</button>}{m.opponent_id===user?.id&&<button onClick={()=>setSelectedMatch(m.id)}>مسؤول Team B</button>}</div>
+              <div className="match-card-foot"><div className="host-mini"><Avatar small name={nameOf(m.host_id)} url={avatarOf(m.host_id)}/><span>{nameOf(m.host_id)}</span></div><button onClick={()=>setSelectedMatch(m.id)}>التيران / التفاصيل</button>{user&&m.host_id!==user.id&&m.opponent_id!==user.id&&
+              <button onClick={()=>requestToJoinTeam(m,'A')} disabled={busy||Boolean(ownJoinRequests.find(q=>q.match_id===m.id))}>🤝 {ownJoinRequests.some(q=>q.match_id===m.id&&q.team==='A')?'طلب Team A مبعوث':'نلعب مع Team A'}</button>}
+              {user&&m.opponent_id&&m.opponent_id!==user.id&&m.host_id!==user.id&&
+              <button onClick={()=>requestToJoinTeam(m,'B')} disabled={busy||Boolean(ownJoinRequests.find(q=>q.match_id===m.id))}>🤝 {ownJoinRequests.some(q=>q.match_id===m.id&&q.team==='B')?'طلب Team B مبعوث':'نلعب مع Team B'}</button>}{!m.opponent_id && m.host_id!==user?.id && <button onClick={()=>requestChallenge(m)} disabled={busy||ownChallenges.some(c=>c.match_id===m.id&&c.status==='pending')}>{ownChallenges.some(c=>c.match_id===m.id&&c.status==='pending')?'طلبك قيد الانتظار':'⚔️ نطلب تحدّي'}</button>}{m.opponent_id===user?.id&&<button onClick={()=>setSelectedMatch(m.id)}>مسؤول Team B</button>}</div>
             </div>
           </article>)}</div>}
       </>}
 
-      {activeTab==='players'&&<><section className="page-intro"><span className="eyebrow">PLAYERS</span><h1>لاعبين Takwira24</h1><p>هوني يظهروا الحسابات الحقيقية، موش أسامي تجريبية.</p></section><label className="search-box wide-search"><Search size={17}/><input placeholder="إبحث على لاعب..." value={query} onChange={e=>setQuery(e.target.value)}/></label>{!user?<div className="t24-empty">سجّل الدخول باش تشوف اللاعبين.</div>:<div className="player-grid">{players.filter(p=>(p.display_name||'').toLowerCase().includes(query.toLowerCase())||(p.public_id||'').toLowerCase().includes(query.toLowerCase())).map(p=><div className="player-card" key={p.id}><Avatar name={p.display_name} url={p.avatar_url}/><div><strong>{p.display_name}</strong><small>{p.city || 'تونس'} · {p.position || sports[p.sport]?.label}</small><small className="t24-id" dir="ltr">{p.public_id}</small></div><button className="outline-button" onClick={()=>{setActiveTab('matches');notice('اختار ماتش من ماتشاتك وافتح التشكيلة باش تدعّي اللاعب')}}>دعوة</button></div>)}</div>}</>}
+      {activeTab==='players'&&<><section className="page-intro"><span className="eyebrow">PLAYERS</span><h1>لاعبين Takwira24</h1><p>هوني يظهروا الحسابات الحقيقية، موش أسامي تجريبية.</p></section><label className="search-box wide-search"><Search size={17}/><input placeholder="إبحث على Firas أو اسم اللاعب أو Player ID..." value={query} onChange={e=>setQuery(e.target.value)}/></label>{!user?<div className="t24-empty">سجّل الدخول باش تشوف اللاعبين.</div>:<div className="player-grid">{players.filter(p=>(p.display_name||'').toLowerCase().includes(query.toLowerCase())||(p.public_id||'').toLowerCase().includes(query.toLowerCase())).map(p=><div className="player-card" key={p.id}><Avatar name={p.display_name} url={p.avatar_url}/><div><strong>{p.display_name}</strong><small>{p.city || 'تونس'} · {p.position || sports[p.sport]?.label}</small><small className="t24-id" dir="ltr">{p.public_id}</small></div><button type="button" className="outline-button" onClick={()=>setViewedPlayer(p)}>شوف البروفيل والتصاور</button></div>)}</div>}</>}
 
       {activeTab==='profile'&&<><section className="profile-cover"><div className="profile-cover-pattern"/><span>MY PLAYER PROFILE</span></section>{!user?<div className="t24-empty">إعمل حساب باش تعمل بطاقة لاعب متاعك.<button className="primary-button" onClick={()=>setAuthOpen(true)}>إنشاء حساب / دخول</button></div>:
         <><div className="profile-head"><Avatar name={displayName} url={profile?.avatar_url}/><div><h1>{displayName} <ShieldCheck size={17}/></h1><p>{user.email || user.phone || 'حساب لاعب'} · {profile?.city || 'تونس'}</p><div className="t24-player-id"><strong>PLAYER ID</strong><code dir="ltr">{profile?.public_id || '...'}</code><button type="button" onClick={()=>navigator.clipboard?.writeText(profile?.public_id||'')}>نسخ ID</button></div><div className="profile-tags"><span>{profile?.position || 'لاعب'}</span><span>{sports[profile?.sport]?.label || 'Foot'}</span></div></div><button className="outline-button" onClick={openProfileEditor}><Pencil size={16}/> تعديل الملف</button></div>
         <div className="profile-bio"><span className="bio-sport-icon">{sports[profile?.sport]?.icon || '⚽'}</span><p>{profile?.bio || 'أضف نبذة على روحك الرياضية.'}</p></div>
         <div className="profile-stats"><div><strong>{lineup.filter(l=>l.player_id===user.id&&l.status==='confirmed').length}</strong><small>ماتش شاركت فيه</small></div><div><strong>{matches.filter(m=>m.host_id===user.id).length}</strong><small>ماتش نظّمتو</small></div></div>
-        <MediaModeration user={user} onProfileChanged={()=>refreshData(user)}/></>}</>}
+        <MediaModeration user={user} onProfileChanged={()=>refreshData(user)}/>
+        <button className="outline-button" type="button" onClick={()=>setViewedPlayer(profile)}>👀 شوف البروفيل متاعي كيما يظهر للناس</button></>}</>}
       <footer className="footer"><span>© 2026 Takwira24</span><span>اللعبة تجمعنا 💚</span><span>{isSupabaseConfigured?'SUPABASE':'CONFIGURATION REQUIRED'}</span></footer>
     </main>
 
+    {viewedPlayer&&<PlayerProfileModal player={viewedPlayer} onClose={()=>setViewedPlayer(null)}/>}
     {authOpen && <AuthModal onClose={()=>setAuthOpen(false)}/>}
     {passwordRecovery && <div className="modal-backdrop"><form className="create-modal" onSubmit={async e=>{e.preventDefault();setBusy(true);const {error:passwordError}=await supabase.auth.updateUser({password:e.target.password.value});setBusy(false);if(passwordError)notice(passwordError.message);else{setPasswordRecovery(false);notice('تبدّلت كلمة السر بنجاح')}}}><div className="modal-head"><h2>كلمة سر جديدة</h2><button type="button" className="icon-button" onClick={()=>setPasswordRecovery(false)}><X/></button></div><label className="field-label">كلمة السر<input type="password" minLength="6" name="password" required /></label><button className="primary-button" disabled={busy}>تأكيد</button></form></div>}
 
@@ -419,6 +510,27 @@ export default function App() {
         {currentMatch.host_id!==user?.id&&!currentMatch.opponent_id&&<div className="t24-challenge-inbox"><h3>⚔️ تحدّي مسؤول فريق A</h3>
           {ownChallenges.some(c=>c.match_id===currentMatch.id&&c.status==='pending')?<p>طلبك تبعث، نستناو مسؤول الفريق يقبلو.</p>:
           <button type="button" className="primary-button" disabled={busy} onClick={()=>requestChallenge(currentMatch)}>ابعث طلب مقابلة ضد Team A</button>}
+        </div>}
+        {user&&(canManageTeam(currentMatch,'A')||canManageTeam(currentMatch,'B'))&&
+          <div className="t24-challenge-inbox"><h3>🤝 طلبات اللعب مع فريقك</h3>
+            {activeTeamRequests.filter(q=>canManageTeam(currentMatch,q.team)).length===0&&<p>ما فماش طلبات جديدة في فريقك توا.</p>}
+            {activeTeamRequests.filter(q=>canManageTeam(currentMatch,q.team)).map(q=><div className="t24-challenge-row" key={q.id}>
+              <button type="button" className="t24-player-open" onClick={()=>setViewedPlayer(players.find(p=>p.id===q.player_id))}>
+                <Avatar name={nameOf(q.player_id)} url={avatarOf(q.player_id)} small/></button>
+              <div><strong>{nameOf(q.player_id)}</strong><small>طالب يدخل Team {q.team}</small></div>
+              <button disabled={busy} onClick={()=>decideTeamRequest(q,true)}>قبول في الفريق</button>
+              <button disabled={busy} onClick={()=>decideTeamRequest(q,false)}>رفض</button>
+            </div>)}
+          </div>}
+        {user&&currentMatch.host_id!==user.id&&currentMatch.opponent_id!==user.id&&<div className="t24-team-join-actions">
+          <h3>تحب تلعب مع فريق ولا ضدّو؟</h3>
+          <div><button type="button" disabled={busy||Boolean(ownJoinRequests.find(q=>q.match_id===currentMatch.id))}
+              onClick={()=>requestToJoinTeam(currentMatch,'A')}>🤝 نلعب مع Team A</button>
+            {currentMatch.opponent_id&&<button type="button" disabled={busy||Boolean(ownJoinRequests.find(q=>q.match_id===currentMatch.id))}
+              onClick={()=>requestToJoinTeam(currentMatch,'B')}>🤝 نلعب مع Team B</button>}
+            {!currentMatch.opponent_id&&<button type="button" disabled={busy||ownChallenges.some(c=>c.match_id===currentMatch.id)}
+              onClick={()=>requestChallenge(currentMatch)}>⚔️ نطلب تحدّي ضد Team A</button>}</div>
+          {ownJoinRequests.filter(q=>q.match_id===currentMatch.id).map(q=><p key={q.id}>طلب اللعب مع Team {q.team}: {q.status==='pending'?'⏳ يستنّى المسؤول':q.status==='accepted'?'✅ مقبول':'❌ مرفوض'}</p>)}
         </div>}
         <FormationPitch outfield={currentMatch.outfield_per_team||6} bench={currentMatch.bench_per_team||0} sport={currentMatch.sport}
           entries={participants} players={players} busy={busy}
