@@ -40,10 +40,11 @@ export default function App() {
   const [selectedMatch, setSelectedMatch] = useState(null)
   const [openedSharedMatch,setOpenedSharedMatch] = useState(false)
   const [targetSlot, setTargetSlot] = useState(null)
+  const [captainSelfSlot,setCaptainSelfSlot] = useState(0)
   const [challenges, setChallenges] = useState([])
   const [joinRequests,setJoinRequests] = useState([])
   const [votes,setVotes] = useState([])
-  const [lang,setLang] = useState('ar')
+  const [lang,setLang] = useState(()=>{try{return window.localStorage.getItem('t24_lang')==='fr'?'fr':'ar'}catch{return 'ar'}})
   const [viewedPlayer,setViewedPlayer] = useState(null)
   const [activeTab, setActiveTab] = useState('home')
   const [sport, setSport] = useState('all')
@@ -62,6 +63,7 @@ export default function App() {
   useEffect(()=>{
     document.documentElement.lang=lang
     document.documentElement.dir=lang==='fr'?'ltr':'rtl'
+    try{window.localStorage.setItem('t24_lang',lang)}catch{}
   },[lang])
   const notice = message => { setToast(message); setTimeout(() => setToast(''), 3600) }
   const displayName = profile?.display_name || user?.user_metadata?.display_name || user?.user_metadata?.full_name || t('لاعب جديد','Nouveau joueur')
@@ -220,7 +222,7 @@ export default function App() {
   }
 
 
-  async function addCaptainToField(match,team){
+  async function addCaptainToField(match,team,requestedSlot=0){
     if(!user)return
     const isOwn=(team==='A'&&match.host_id===user.id)||(team==='B'&&match.opponent_id===user.id)
     if(!isOwn||match.status!=='open'){notice(t('الماتش مسكّر أو الفريق موش متاعك.','Match fermé ou équipe non autorisée.'));return}
@@ -228,8 +230,11 @@ export default function App() {
       notice(t('إنت موجود بالفعل في التشكيلة.','Tu es déjà dans la composition.'));return
     }
     const slots=Number(match.outfield_per_team||6)+1+Number(match.bench_per_team||0)
-    const free=Array.from({length:slots},(_,i)=>i).find(i=>!lineup.some(row=>row.match_id===match.id&&row.team===team&&row.slot===i))
-    if(free===undefined){notice(t('الفريق معمّر.','Équipe complète.'));return}
+    const free=Number(requestedSlot)
+    if(!Number.isInteger(free)||free<0||free>=slots){notice(t('مركز غير صحيح','Poste invalide'));return}
+    if(lineup.some(row=>row.match_id===match.id&&row.team===team&&row.slot===free)){
+      notice(t('المركز هذا معمّر، اختار مركز فارغ.','Ce poste est occupé, choisis-en un autre.'));return
+    }
     setBusy(true)
     try{
       const {error:joinError}=await supabase.from('t24_lineup').insert({match_id:match.id,player_id:user.id,team,slot:free,status:'confirmed'})
@@ -585,7 +590,7 @@ export default function App() {
               onClick={()=>requestChallenge(currentMatch)}>{t('⚔️ نطلب تحدّي ضد Team A','⚔️ Défier équipe A')}</button>}</div>
           {ownJoinRequests.filter(q=>q.match_id===currentMatch.id).map(q=><p key={q.id}>طلب اللعب مع Team {q.team}: {q.status==='pending'?'⏳ يستنّى المسؤول':q.status==='accepted'?'✅ مقبول':'❌ مرفوض'}</p>)}
         </div>}
-        <div className="t24-captain-self-pick">{user&&currentMatch.status==='open'&&(['A','B'].some(team=>canManageTeam(currentMatch,team)))&& !lineup.some(row=>row.match_id===currentMatch.id&&row.player_id===user.id)&&<button type="button" className="primary-button" disabled={busy} onClick={()=>addCaptainToField(currentMatch,canManageTeam(currentMatch,'A')?'A':'B')}>⚽ {t('حطّ روحي في التشكيلة','Me placer dans la composition')}</button>}</div>
+        <div className="t24-captain-self-pick">{user&&currentMatch.status==='open'&&(['A','B'].some(team=>canManageTeam(currentMatch,team)))&& !lineup.some(row=>row.match_id===currentMatch.id&&row.player_id===user.id)&&<div className="t24-captain-pick-controls"><label>{t('مركزي في التشكيلة','Mon poste sur le terrain')} <select value={captainSelfSlot} onChange={e=>setCaptainSelfSlot(Number(e.target.value))}>{Array.from({length:Number(currentMatch.outfield_per_team||6)+1+Number(currentMatch.bench_per_team||0)},(_,i)=><option key={i} value={i}>{i===0?'Gardien':i<=Number(currentMatch.outfield_per_team||6)?(t('لاعب ','Joueur ')+i):(t('بديل ','Remplaçant ')+(i-Number(currentMatch.outfield_per_team||6)))}</option>)}</select></label><button type="button" className="primary-button" disabled={busy} onClick={()=>addCaptainToField(currentMatch,canManageTeam(currentMatch,'A')?'A':'B',captainSelfSlot)}>⚽ {t('حطّ روحي في التشكيلة','Me placer dans la composition')}</button></div>}</div>
         <ShareMatchPanel match={currentMatch} lineup={lineup} lang={lang}/>
         <MatchResults match={currentMatch} entries={participants} players={players} user={user} lang={lang} onChanged={()=>refreshData(user)}/>
         <FormationPitch lang={lang} outfield={currentMatch.outfield_per_team||6} bench={currentMatch.bench_per_team||0} sport={currentMatch.sport}
