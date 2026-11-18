@@ -264,7 +264,7 @@ export default function App() {
     if(notification.kind==='invitation'){
       // Use fresh row rather than a potentially stale in-memory invitation.
       const {data,error:lookupError}=await supabase.from('t24_lineup').select('*')
-        .eq('match_id',notification.match_id).eq('player_id',user.id).eq('status','invited').maybeSingle()
+        .eq('id',notification.source_id).eq('player_id',user.id).eq('status','invited').maybeSingle()
       if(lookupError)throw lookupError
       if(!data)throw Error('الدعوة هاذي تمّ الردّ عليها أو تنحّات.')
       await respondInvite(data,accept)
@@ -272,18 +272,16 @@ export default function App() {
     }
     if(notification.kind==='team_request'){
       const {data,error:lookupError}=await supabase.from('t24_team_requests').select('*')
-        .eq('match_id',notification.match_id).eq('status','pending')
-        .order('created_at',{ascending:true})
+        .eq('id',notification.source_id).eq('status','pending')
       if(lookupError)throw lookupError
-      const candidate=(data||[]).find(q=>(q.team==='A'&&matches.find(m=>m.id===q.match_id)?.host_id===user.id)
-        ||(q.team==='B'&&matches.find(m=>m.id===q.match_id)?.opponent_id===user.id))
+      const candidate=(data||[])[0]
       if(!candidate)throw Error('افتح الماتش وشوف الطلبات الجديدة باش تختار اللاعب.')
       await decideTeamRequest(candidate,accept)
       return
     }
     if(notification.kind==='challenge'){
       const {data,error:lookupError}=await supabase.from('t24_challenges').select('*')
-        .eq('match_id',notification.match_id).eq('status','pending').order('created_at',{ascending:true})
+        .eq('id',notification.source_id).eq('status','pending')
       if(lookupError)throw lookupError
       if(!(data||[]).length)throw Error('ما عادش فما تحدّي معلّق.')
       await respondChallenge(data[0],accept)
