@@ -470,7 +470,7 @@ export default function App() {
         <div className="breadcrumb">الرئيسية / <b>{activeTab==='home'?t('اكتشف الماتشات','Découvrir'):activeTab==='players'?t('اللاعبين','Joueurs'):activeTab==='profile'?t('حسابي','Mon profil'):t('مبارياتي','Mes matchs')}</b></div>
         <div className="top-actions">
           <div className="t24-lang-toggle" role="group" aria-label="Language / اللغة"><button type="button" className={lang==='ar'?'chosen':''} onClick={()=>setLang('ar')}>عربي</button><button type="button" className={lang==='fr'?'chosen':''} onClick={()=>setLang('fr')}>FR</button></div>
-          <NotificationsPanel user={user} onRefresh={()=>refreshData(user)}
+          <NotificationsPanel lang={lang} user={user} onRefresh={()=>refreshData(user)}
             onOpenMatch={matchId=>{setSelectedMatch(matchId);setActiveTab('matches')}}
             onAcceptInvite={(notification,accept)=>notificationAction(notification,accept)}
             onDecideRequest={(notification,accept)=>notificationAction(notification,accept)}
@@ -516,13 +516,13 @@ export default function App() {
       {activeTab==='players'&&<><section className="page-intro"><span className="eyebrow">PLAYERS</span><h1>{t('لاعبين Takwira24','Les joueurs Takwira24')}</h1><p>{t('هوني يظهروا الحسابات الحقيقية، موش أسامي تجريبية.','Découvrez les profils et les photos de vrais joueurs.')}</p></section><label className="search-box wide-search"><Search size={17}/><input placeholder={t('إبحث على Firas أو اسم اللاعب أو Player ID...','Rechercher un joueur par nom ou identifiant...')} value={query} onChange={e=>setQuery(e.target.value)}/></label>{!user?<div className="t24-empty">{t('سجّل الدخول باش تشوف اللاعبين.','Connecte-toi pour voir les joueurs.')}</div>:<div className="player-grid">{players.filter(p=>(p.display_name||'').toLowerCase().includes(query.toLowerCase())||(p.public_id||'').toLowerCase().includes(query.toLowerCase())).map(p=><div className="player-card" key={p.id}><Avatar name={p.display_name} url={p.avatar_url}/><div><strong>{p.display_name}</strong><small>{p.city || 'تونس'} · {p.position || sports[p.sport]?.label}</small><small className="t24-id" dir="ltr">{p.public_id}</small><small className="t24-player-rating-mini">⭐ {playerSeasonRating(p.id).average===null?'—':playerSeasonRating(p.id).average.toFixed(1)+'/10'} • 2026/2027</small></div><button type="button" className="outline-button" onClick={()=>setViewedPlayer(p)}>{t('شوف البروفيل والتصاور','Voir le profil et les photos')}</button></div>)}</div>}</>}
 
       {activeTab==='profile'&&<><section className="profile-cover"><div className="profile-cover-pattern"/><span>MY PLAYER PROFILE</span></section>{!user?<div className="t24-empty" >{t('إعمل حساب باش تعمل بطاقة لاعب متاعك.','Crée un compte pour avoir ta carte de joueur.')}<button className="primary-button" onClick={()=>setAuthOpen(true)}>{t('إنشاء حساب / دخول','Inscription / Connexion')}</button></div>:
-        <><div className="profile-head"><Avatar name={displayName} url={profile?.avatar_url}/><div><h1>{displayName} <ShieldCheck size={17}/></h1><p>{user.email || user.phone || 'حساب لاعب'} · {profile?.city || 'تونس'}</p><div className="t24-player-id"><strong>PLAYER ID</strong><code dir="ltr">{profile?.public_id || '...'}</code><button type="button" onClick={()=>navigator.clipboard?.writeText(profile?.public_id||'')}>{t('نسخ ID','Copier ID')}</button></div><div className="profile-tags"><span>{profile?.position || 'لاعب'}</span><span>{sports[profile?.sport]?.label || 'Foot'}</span></div></div><button className="outline-button" onClick={openProfileEditor}><Pencil size={16}/> تعديل الملف</button></div>
+        <><div className="profile-head"><Avatar name={displayName} url={profile?.avatar_url}/><div><h1>{displayName} <ShieldCheck size={17}/></h1><p>{user.email || user.phone || 'حساب لاعب'} · {profile?.city || 'تونس'}</p><div className="t24-player-id"><strong>PLAYER ID</strong><code dir="ltr">{profile?.public_id || '...'}</code><button type="button" onClick={()=>navigator.clipboard?.writeText(profile?.public_id||'')}>{t('نسخ ID','Copier ID')}</button></div><div className="profile-tags"><span>{profile?.position || 'لاعب'}</span><span>{sports[profile?.sport]?.label || 'Foot'}</span></div></div><button className="outline-button" onClick={openProfileEditor}><Pencil size={16}/>{t('تعديل الملف','Modifier le profil')}</button></div>
         <div className="profile-bio"><span className="bio-sport-icon">{sports[profile?.sport]?.icon || '⚽'}</span><p>{profile?.bio || t('أضف نبذة على روحك الرياضية.','Ajoute une description sportive sur ton profil.')}</p></div>
         <div className="profile-stats"><div><strong>{lineup.filter(l=>l.player_id===user.id&&l.status==='confirmed').length}</strong><small>{t('ماتش شاركت فيه','Matchs disputés')}</small></div><div><strong>{matches.filter(m=>m.host_id===user.id).length}</strong><small>{t('ماتش نظّمتو','Matchs créés')}</small></div></div>
         <div className="t24-season-profile"><div><span>SEASON 2026/2027</span><h3>{t('تقييم الموسم','Note de la saison')}</h3></div><strong>⭐ {playerSeasonRating(user.id).average===null?'—':playerSeasonRating(user.id).average.toFixed(1)+'/10'}</strong><small>{playerSeasonRating(user.id).count} {t('تقييمات','notes')} • {playerSeasonRating(user.id).matches} {t('ماتشات','matchs')}</small></div>
         <MediaModeration user={user} lang={lang} onProfileChanged={()=>refreshData(user)}/>
         <button className="outline-button" type="button" onClick={()=>setViewedPlayer(profile)}>{t('👀 شوف البروفيل متاعي كيما يظهر للناس','👀 Voir mon profil public')}</button></>}</>}
-      <footer className="footer"><span>© 2026 Takwira24</span><span>اللعبة تجمعنا 💚</span><span>{isSupabaseConfigured?'SUPABASE':'CONFIGURATION REQUIRED'}</span></footer>
+      <footer className="footer"><span>© 2026 Takwira24</span><span>{t('اللعبة تجمعنا 💚','Le sport nous réunit 💚')}</span><span>{isSupabaseConfigured?'SUPABASE':'CONFIGURATION REQUIRED'}</span></footer>
     </main>
 
     {viewedPlayer&&<PlayerProfileModal player={viewedPlayer} lang={lang} onClose={()=>setViewedPlayer(null)}/>}
@@ -539,7 +539,7 @@ export default function App() {
         <label className="field-label">{t('المستوى','Niveau')}<select value={form.skill_level} onChange={e=>setForm({...form,skill_level:e.target.value})}>{['مفتوح','مبتدئ','متوسط','متقدم'].map((v,i)=><option key={v} value={v}>{lang==='fr'?['Ouvert','Débutant','Intermédiaire','Avancé'][i]:v}</option>)}</select></label>
         <div className="t24-formation-choice"><strong>{t('⚽ Formation — الأساسيين في كل فريق','⚽ Composition — titulaires par équipe')}</strong><div>{[6,7,8].map(n=><button key={n} className={Number(form.outfield_per_team)===n?'selected':''} type="button" onClick={()=>setForm({...form,outfield_per_team:n})}>{n} + Gardien</button>)}</div></div>
         <div className="t24-formation-choice"><strong>{t('🪑 Banc des remplaçants لكل فريق','🪑 Remplaçants par équipe')}</strong><div>{[0,2,3].map(n=><button key={n} className={Number(form.bench_per_team)===n?'selected':''} type="button" onClick={()=>setForm({...form,bench_per_team:n})}>{n} {t('بدلاء','remplaçants')}</button>)}</div></div>
-        <FormationPitch outfield={form.outfield_per_team} bench={form.bench_per_team} sport={form.sport}/>
+        <FormationPitch lang={lang} outfield={form.outfield_per_team} bench={form.bench_per_team} sport={form.sport}/>
         <button className="primary-button submit-match" disabled={busy}><CirclePlus size={18}/>{busy?t('جاري الحفظ','Enregistrement...'):t('إنشاء الماتش والتشكيلة','Créer le match')}</button>
       </form>
     </div>}
@@ -588,7 +588,7 @@ export default function App() {
         <div className="t24-captain-self-pick">{user&&currentMatch.status==='open'&&(['A','B'].some(team=>canManageTeam(currentMatch,team)))&& !lineup.some(row=>row.match_id===currentMatch.id&&row.player_id===user.id)&&<button type="button" className="primary-button" disabled={busy} onClick={()=>addCaptainToField(currentMatch,canManageTeam(currentMatch,'A')?'A':'B')}>⚽ {t('حطّ روحي في التشكيلة','Me placer dans la composition')}</button>}</div>
         <ShareMatchPanel match={currentMatch} lineup={lineup} lang={lang}/>
         <MatchResults match={currentMatch} entries={participants} players={players} user={user} lang={lang} onChanged={()=>refreshData(user)}/>
-        <FormationPitch outfield={currentMatch.outfield_per_team||6} bench={currentMatch.bench_per_team||0} sport={currentMatch.sport}
+        <FormationPitch lang={lang} outfield={currentMatch.outfield_per_team||6} bench={currentMatch.bench_per_team||0} sport={currentMatch.sport}
           entries={participants} players={players} busy={busy}
           canEdit={canManageTeam(currentMatch,'A')||canManageTeam(currentMatch,'B')}
           onSelectSlot={(team,slot,row)=>{
@@ -616,7 +616,7 @@ export default function App() {
         <p className="t24-auth-tip">{t('🔎 إضغط على دائرة فارغة في فريقك: تنجم تختار لاعب بالاسم أو Player ID وتبعثلو دعوة.','🔎 Appuie sur une position vide de ton équipe pour inviter un joueur par nom ou par ID.')}</p>
       </div>
     </div>}
-    {targetSlot && currentMatch && <PlayerSearchModal slot={targetSlot} busy={busy} onClose={()=>setTargetSlot(null)}
+    {targetSlot && currentMatch && <PlayerSearchModal lang={lang} slot={targetSlot} busy={busy} onClose={()=>setTargetSlot(null)}
       excludeIds={lineup.filter(l=>l.match_id===currentMatch.id).map(l=>l.player_id)}
       onInvite={(player,slot)=>invitePlayer(player,slot)}/>}
     {toast&&<div className="toast"><CheckCircle2 size={18}/>{toast}</div>}
