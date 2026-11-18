@@ -105,3 +105,46 @@
 .t24-report-row{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #dbe7d9;padding:10px;font-size:12px}
 .t24-avatar-upload small{font-size:11px;color:#748475;line-height:1.6;max-width:270px}
 @media(max-width:480px){.t24-media-section{padding:12px}.t24-media-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.t24-media-card>img,.t24-media-placeholder{height:125px}.t24-auth-methods button{font-size:11px}}
+
+
+/* 2026 premium sports visual refresh – user-provided stadium photo references */
+:root {--t24-forest:#0b291e;--t24-grass:#b9ef6d}
+body{background:linear-gradient(180deg,#eef5ee,#f4f7f4 430px)}
+.app-shell .sidebar{background:linear-gradient(180deg,#071811,#153c29 70%,#071812);box-shadow:-8px 0 36px #0d2b1b20}
+.main-content .topbar{border-bottom-color:#dbe7db}
+.welcome-row h1{font-weight:900}
+.hero-card{min-height:310px;background:
+linear-gradient(270deg,rgba(7,27,22,.92) 0%,rgba(8,35,26,.67) 57%,rgba(8,38,35,.22) 100%),
+url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JJJQx7uBtP724OZ2KWNMaPLMsw/90f9486e-35e5-4e5c-a085-5794ecdb9177.png") center 57% / cover no-repeat !important;
+border-radius:22px;box-shadow:0 18px 45px #0b231b3d}
+.hero-card::after{background:none!important}
+.hero-copy{position:relative;z-index:2}
+.hero-copy h2{color:#fff;text-shadow:0 3px 12px #0007}
+.hero-copy p{color:#e8f6e6}
+.hero-copy h2 em{color:#c0ff75}
+.hero-art.t24-sport-cover{pointer-events:none;opacity:1;filter:drop-shadow(0 14px 32px #08170b9c)}
+.t24-cover-glow{position:absolute;inset:0;background:radial-gradient(circle at 75% 70%,#bff77c6b,transparent 55%)}
+.t24-cover-football{position:absolute;font-size:110px;right:25%;bottom:7px;filter:drop-shadow(0 14px 12px #000b)}
+.t24-cover-handball{position:absolute;font-size:60px;right:0;top:23%;transform:rotate(-10deg);filter:drop-shadow(0 15px 11px #000b)}
+.t24-sports-covers{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:17px 0 25px}
+.t24-sport-tile{min-height:150px;display:flex;align-items:end;padding:18px;position:relative;overflow:hidden;border-radius:17px;cursor:pointer;box-shadow:0 9px 28px #0e2a201c;isolation:isolate}
+.t24-sport-tile:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,#071e16e5 0%,#14271b1f 95%),var(--photo) center/cover no-repeat;transition:transform .25s}
+.t24-sport-tile:hover:before{transform:scale(1.05)}
+.t24-sport-tile.t24-sport-foot{--photo:url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JJJQx7uBtP724OZ2KWNMaPLMsw/84272c46-75d6-40b9-8b0e-f00460e8cae9.png")}
+.t24-sport-tile.t24-sport-hand{--photo:url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JJJQx7uBtP724OZ2KWNMaPLMsw/7d616e8f-b7d9-4cfd-aaa8-30175b721349.png")}
+.t24-sport-tile>span{font-size:37px;filter:drop-shadow(0 3px 7px #0009);margin-left:13px}
+.t24-sport-tile>div{display:flex;flex-direction:column;gap:4px;color:white;text-shadow:0 2px 8px #0008}
+.t24-sport-tile strong{font-family:DM Sans,sans-serif;letter-spacing:1px;font-size:18px}
+.t24-sport-tile small{font-size:12px;color:#e4f3e9}
+.match-visual{background:linear-gradient(0deg,#051d1699,#0d342016),url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JJJQx7uBtP724OZ2KWNMaPLMsw/5726e8ec-aa8d-4994-bbe5-2d442e4aee1e.png") center 55%/cover no-repeat !important}
+.match-visual.visual-blue{background:linear-gradient(0deg,#07233b99,#0d342016),url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JJJQx7uBtP724OZ2KWNMaPLMsw/88faf655-8b33-4abe-9cce-c21d71f91433.png") center/cover no-repeat !important}
+.profile-cover{background:linear-gradient(90deg,#123420df,#2a4b3955),url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JJJQx7uBtP724OZ2KWNMaPLMsw/84272c46-75d6-40b9-8b0e-f00460e8cae9.png") center 50%/cover no-repeat!important}
+.t24-formation-choice{background:#f4f9f0;border:1px solid #dfecd8;border-radius:15px;padding:13px;margin:13px 0}
+.t24-formation-choice strong{font-size:13px;font-weight:900;color:#274a2e;display:block;margin:0 0 10px}
+.t24-formation-choice>div{display:flex;flex-wrap:wrap;gap:8px}
+.t24-formation-choice button{border:1px solid #c8d8c4;background:white;border-radius:10px;padding:10px 12px;font-size:12px;font-weight:900;color:#355f3e;flex:1;min-width:88px}
+.t24-formation-choice button.selected{color:#102618;background:#c4f16f;border-color:#82b948;box-shadow:0 3px 9px #6aa93532}
+.t24-create-match-modal{max-width:800px;width:min(800px,100%)}
+.t24-lineup-modal{max-width:780px;width:min(780px,100%)}
+@media(max-width:800px){.hero-card{min-height:255px}.t24-sports-covers{gap:9px}.t24-sport-tile{min-height:115px;padding:12px}.t24-sport-tile>span{font-size:28px;margin-left:5px}.t24-sport-tile strong{font-size:12px}.t24-sport-tile small{font-size:10px}.t24-cover-football{font-size:65px}.t24-cover-handball{font-size:38px}}
+@media(max-width:370px){.t24-sports-covers{grid-template-columns:1fr}.hero-card{min-height:260px}}
