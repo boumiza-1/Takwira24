@@ -456,7 +456,7 @@ export default function App() {
   const currentChallenges = challenges.filter(c=>c.match_id===selectedMatch)
   const canManageTeam = (game,team)=>Boolean(user&&game&&((team==='A'&&game.host_id===user.id)||(team==='B'&&game.opponent_id===user.id)))
 
-  if (!authReady) return <div className="t24-loading">⚽ جاري تحميل Takwira24...</div>
+  if (!authReady) return <div className="t24-loading">⚽ {t('جاري تحميل Takwira24...','Chargement de Takwira24...')}</div>
 
   return <div className="app-shell">
     <aside className="sidebar">
@@ -466,13 +466,13 @@ export default function App() {
         <button key={tab} className={'side-link ' + (activeTab===tab?'active':'')} onClick={()=>setActiveTab(tab)}><Icon/><span>{label}</span></button>)}
       <div className="side-promo"><div className="promo-ball">⚽</div><strong>{t('اللعبة تحلى بالصحاب','Le sport, c’est mieux ensemble')}</strong><p>{t('لمّ فريقك، كوّن ماتش، وشجّع صحابك.','Organise un match, compose ton équipe et joue avec tes amis.')}</p><button onClick={openMatch}>{t('أنشئ ماتش','Créer un match')} <ArrowLeft size={15}/></button></div>
       <button className="sidebar-user t24-account-button" onClick={()=>user?setActiveTab('profile'):setAuthOpen(true)}>
-        <Avatar name={displayName} url={profile?.avatar_url}/><span><strong>{user?displayName:'سجّل الدخول'}</strong><small>{user?t('حساب لاعب','Compte joueur'):t('إنشاء حساب جديد','Créer un compte')}</small></span><Settings2 size={17}/>
+        <Avatar name={displayName} url={profile?.avatar_url}/><span><strong>{user?displayName:t('سجّل الدخول','Connexion')}</strong><small>{user?t('حساب لاعب','Compte joueur'):t('إنشاء حساب جديد','Créer un compte')}</small></span><Settings2 size={17}/>
       </button>
     </aside>
     <main className="main-content">
       <header className="topbar">
         <div className="mobile-brand"><span className="brand-mark">⚽</span> takwira<span className="brand-24">24</span></div>
-        <div className="breadcrumb">الرئيسية / <b>{activeTab==='home'?t('اكتشف الماتشات','Découvrir'):activeTab==='players'?t('اللاعبين','Joueurs'):activeTab==='profile'?t('حسابي','Mon profil'):t('مبارياتي','Mes matchs')}</b></div>
+        <div className="breadcrumb">{t('الرئيسية','Accueil')} / <b>{activeTab==='home'?t('اكتشف الماتشات','Découvrir'):activeTab==='players'?t('اللاعبين','Joueurs'):activeTab==='profile'?t('حسابي','Mon profil'):t('مبارياتي','Mes matchs')}</b></div>
         <div className="top-actions">
           <div className="t24-lang-toggle" role="group" aria-label="Language / اللغة"><button type="button" className={lang==='ar'?'chosen':''} onClick={()=>setLang('ar')}>عربي</button><button type="button" className={lang==='fr'?'chosen':''} onClick={()=>setLang('fr')}>FR</button></div>
           <NotificationsPanel lang={lang} user={user} onRefresh={()=>refreshData(user)}
@@ -485,8 +485,8 @@ export default function App() {
         </div>
       </header>
 
-      {!isSupabaseConfigured && <div className="t24-warning">قاعدة البيانات موش مهيّأة في نسخة النشر. يلزم إضافة إعدادات Supabase.</div>}
-      {error && <div className="t24-warning">{error} <button onClick={()=>user&&refreshData(user)}><RefreshCw size={15}/> إعادة المحاولة</button></div>}
+      {!isSupabaseConfigured && <div className="t24-warning">{t('قاعدة البيانات موش مهيّأة في نسخة النشر. يلزم إضافة إعدادات Supabase.','Supabase n’est pas configuré dans cette version.')}</div>}
+      {error && <div className="t24-warning">{error} <button onClick={()=>user&&refreshData(user)}><RefreshCw size={15}/>{t('إعادة المحاولة','Réessayer')}</button></div>}
 
       {activeTab==='home' && <>
         <section className="welcome-row"><div><div className="eyebrow">TAKWIRA24 ⚽</div><h1>{t('الماتش الجاي،','Le prochain match')} <em>{t('يبدأ من هنا.','commence ici.')}</em></h1><p>{t('ماتشوات حقيقية، لاعبين مسجّلين، وتشكيلات تتبدّل لايف.','De vrais matchs, de vrais joueurs, des équipes et des formations en direct.')}</p></div><button className="primary-button" onClick={openMatch}><Plus size={20}/>{t('أنشئ ماتش','Créer un match')}</button></section>
@@ -502,26 +502,26 @@ export default function App() {
       {(activeTab==='home'||activeTab==='matches') && <>
         <div className="section-heading"><div><span className="eyebrow">FIND YOUR GAME</span><h2>{activeTab==='matches'?t('ماتشاتي ودعواتي','Mes matchs et invitations'):t('ماتشات تستنّى فيك','Matchs disponibles')}</h2></div>{user&&<button className="outline-button" onClick={()=>refreshData(user)}><RefreshCw size={15}/>{t('تحديث','Actualiser')}</button>}</div>
         <div className="filters-row"><div className="sport-filters"><button className={'sport-filter '+(sport==='all'?'chosen':'')} onClick={()=>setSport('all')} >{t('الكل','Tous')}</button>{Object.entries(sports).map(([id,s])=><button key={id} className={'sport-filter '+(sport===id?'chosen':'')} onClick={()=>setSport(id)}>{s.icon} {lang==='fr'?sportLabel(id):s.label}</button>)}</div><label className="search-box"><Search size={17}/><input placeholder={t('قلّب على ماتش أو مدينة...','Chercher un match ou une ville...')} value={query} onChange={e=>setQuery(e.target.value)}/></label></div>
-        {activeTab==='matches'&&ownInvitations.length>0&&<div className="t24-invites">{ownInvitations.map(entry=><div className="t24-invite" key={entry.id}><span>📩 دعوة للماتش: {matches.find(m=>m.id===entry.match_id)?.title || 'ماتش'}</span><button onClick={()=>respondInvite(entry,true)} disabled={busy}>قبول</button><button onClick={()=>respondInvite(entry,false)} disabled={busy}>{t('رفض','Refuser')}</button></div>)}</div>}
-        {!user?<div className="t24-empty">🔐 اعمل Login باش تشوف الماتشات الحقيقية وتشارك.<button className="primary-button" onClick={()=>setAuthOpen(true)}>تسجيل الدخول / إنشاء حساب</button></div>:
-          loading&&matches.length===0?<div className="t24-empty">جاري جلب الماتشات...</div>:
-          visible.length===0?<div className="t24-empty">ما فمّاش ماتشات توّا. كون أوّل واحد يعمل ماتش! <button className="primary-button" onClick={openMatch}>أنشئ ماتش</button></div>:
+        {activeTab==='matches'&&ownInvitations.length>0&&<div className="t24-invites">{ownInvitations.map(entry=><div className="t24-invite" key={entry.id}><span>📩 {t('دعوة للماتش:','Invitation au match :')} {matches.find(m=>m.id===entry.match_id)?.title || t('ماتش','Match')}</span><button onClick={()=>respondInvite(entry,true)} disabled={busy}>{t('قبول','Accepter')}</button><button onClick={()=>respondInvite(entry,false)} disabled={busy}>{t('رفض','Refuser')}</button></div>)}</div>}
+        {!user?<div className="t24-empty">{t('🔐 اعمل Login باش تشوف الماتشات الحقيقية وتشارك.','🔐 Connecte-toi pour voir les matchs et participer.')}<button className="primary-button" onClick={()=>setAuthOpen(true)}>{t('تسجيل الدخول / إنشاء حساب','Connexion / Inscription')}</button></div>:
+          loading&&matches.length===0?<div className="t24-empty">{t('جاري جلب الماتشات...','Chargement des matchs...')}</div>:
+          visible.length===0?<div className="t24-empty">{t('ما فمّاش ماتشات توّا. كون أوّل واحد يعمل ماتش!','Aucun match pour le moment. Crée le premier !')} <button className="primary-button" onClick={openMatch}>{t('أنشئ ماتش','Créer un match')}</button></div>:
           <div className="match-grid">{visible.map(m=><article key={m.id} className="match-card">
             <div className={'match-visual visual-'+sports[m.sport]?.tint}><div className="visual-top"><span className="match-sport">{sports[m.sport]?.icon} {sportLabel(m.sport)}</span><span className="match-open">{({open:t('مفتوح','Ouvert'),completed:t('وفّى','Terminé'),cancelled:t('ملغى','Annulé'),postponed:t('تأجّل','Reporté'),full:t('كامل','Complet')}[m.status]||m.status)}</span></div><div className="visual-ball">{sports[m.sport]?.icon}</div></div>
             <div className="match-body"><div className="match-title-row"><h3>{m.title}</h3><span className="match-date">{prettyDate(m.starts_at)}</span></div><div className="match-detail"><MapPin size={15}/>{m.venue} · {m.area}</div><div className="match-detail"><Clock3 size={15}/>{prettyTime(m.starts_at)}</div>
-              <div className="players-progress"><div className="progress-label"><span>اللاعبين</span><strong>{lineup.filter(l=>l.match_id===m.id&&l.status==='confirmed').length}/{m.total_players}</strong></div><div className="progress-track"><i style={{width:Math.min(100,lineup.filter(l=>l.match_id===m.id&&l.status==='confirmed').length/m.total_players*100)+'%'}}/></div></div>
+              <div className="players-progress"><div className="progress-label"><span>{t('اللاعبين','Joueurs')}</span><strong>{lineup.filter(l=>l.match_id===m.id&&l.status==='confirmed').length}/{m.total_players}</strong></div><div className="progress-track"><i style={{width:Math.min(100,lineup.filter(l=>l.match_id===m.id&&l.status==='confirmed').length/m.total_players*100)+'%'}}/></div></div>
               <div className="match-card-foot"><div className="host-mini"><Avatar small name={nameOf(m.host_id)} url={avatarOf(m.host_id)}/><span>{nameOf(m.host_id)}</span></div><button onClick={()=>setSelectedMatch(m.id)}>{t('التيران / التفاصيل','Terrain / Détails')}</button>{user&&m.host_id!==user.id&&m.opponent_id!==user.id&&
               <button onClick={()=>requestToJoinTeam(m,'A')} disabled={busy||Boolean(ownJoinRequests.find(q=>q.match_id===m.id))}>🤝 {ownJoinRequests.some(q=>q.match_id===m.id&&q.team==='A')?t('طلب Team A مبعوث','Demande à A envoyée'):t('نلعب مع Team A','Jouer avec A')}</button>}
               {user&&m.opponent_id&&m.opponent_id!==user.id&&m.host_id!==user.id&&
-              <button onClick={()=>requestToJoinTeam(m,'B')} disabled={busy||Boolean(ownJoinRequests.find(q=>q.match_id===m.id))}>🤝 {ownJoinRequests.some(q=>q.match_id===m.id&&q.team==='B')?t('طلب Team B مبعوث','Demande à B envoyée'):t('نلعب مع Team B','Jouer avec B')}</button>}{!m.opponent_id && m.host_id!==user?.id && <button onClick={()=>requestChallenge(m)} disabled={busy||ownChallenges.some(c=>c.match_id===m.id&&c.status==='pending')}>{ownChallenges.some(c=>c.match_id===m.id&&c.status==='pending')?t('طلبك قيد الانتظار','Demande en attente'):t('⚔️ نطلب تحدّي','⚔️ Défier')}</button>}{m.opponent_id===user?.id&&<button onClick={()=>setSelectedMatch(m.id)}>مسؤول Team B</button>}</div>
+              <button onClick={()=>requestToJoinTeam(m,'B')} disabled={busy||Boolean(ownJoinRequests.find(q=>q.match_id===m.id))}>🤝 {ownJoinRequests.some(q=>q.match_id===m.id&&q.team==='B')?t('طلب Team B مبعوث','Demande à B envoyée'):t('نلعب مع Team B','Jouer avec B')}</button>}{!m.opponent_id && m.host_id!==user?.id && <button onClick={()=>requestChallenge(m)} disabled={busy||ownChallenges.some(c=>c.match_id===m.id&&c.status==='pending')}>{ownChallenges.some(c=>c.match_id===m.id&&c.status==='pending')?t('طلبك قيد الانتظار','Demande en attente'):t('⚔️ نطلب تحدّي','⚔️ Défier')}</button>}{m.opponent_id===user?.id&&<button onClick={()=>setSelectedMatch(m.id)}>{t('مسؤول Team B','Capitaine équipe B')}</button>}</div>
             </div>
           </article>)}</div>}
       </>}
 
-      {activeTab==='players'&&<><section className="page-intro"><span className="eyebrow">PLAYERS</span><h1>{t('لاعبين Takwira24','Les joueurs Takwira24')}</h1><p>{t('هوني يظهروا الحسابات الحقيقية، موش أسامي تجريبية.','Découvrez les profils et les photos de vrais joueurs.')}</p></section><label className="search-box wide-search"><Search size={17}/><input placeholder={t('إبحث على Firas أو اسم اللاعب أو Player ID...','Rechercher un joueur par nom ou identifiant...')} value={query} onChange={e=>setQuery(e.target.value)}/></label>{!user?<div className="t24-empty">{t('سجّل الدخول باش تشوف اللاعبين.','Connecte-toi pour voir les joueurs.')}</div>:<div className="player-grid">{players.filter(p=>(p.display_name||'').toLowerCase().includes(query.toLowerCase())||(p.public_id||'').toLowerCase().includes(query.toLowerCase())).map(p=><div className="player-card" key={p.id}><Avatar name={p.display_name} url={p.avatar_url}/><div><strong>{p.display_name}</strong><small>{p.city || 'تونس'} · {p.position || sports[p.sport]?.label}</small><small className="t24-id" dir="ltr">{p.public_id}</small><small className="t24-player-rating-mini">⭐ {playerSeasonRating(p.id).average===null?'—':playerSeasonRating(p.id).average.toFixed(1)+'/10'} • 2026/2027</small></div><button type="button" className="outline-button" onClick={()=>setViewedPlayer(p)}>{t('شوف البروفيل والتصاور','Voir le profil et les photos')}</button></div>)}</div>}</>}
+      {activeTab==='players'&&<><section className="page-intro"><span className="eyebrow">PLAYERS</span><h1>{t('لاعبين Takwira24','Les joueurs Takwira24')}</h1><p>{t('هوني يظهروا الحسابات الحقيقية، موش أسامي تجريبية.','Découvrez les profils et les photos de vrais joueurs.')}</p></section><label className="search-box wide-search"><Search size={17}/><input placeholder={t('إبحث على Firas أو اسم اللاعب أو Player ID...','Rechercher un joueur par nom ou identifiant...')} value={query} onChange={e=>setQuery(e.target.value)}/></label>{!user?<div className="t24-empty">{t('سجّل الدخول باش تشوف اللاعبين.','Connecte-toi pour voir les joueurs.')}</div>:<div className="player-grid">{players.filter(p=>(p.display_name||'').toLowerCase().includes(query.toLowerCase())||(p.public_id||'').toLowerCase().includes(query.toLowerCase())).map(p=><div className="player-card" key={p.id}><Avatar name={p.display_name} url={p.avatar_url}/><div><strong>{p.display_name}</strong><small>{p.city || t('تونس','Tunisie')} · {p.position || sportLabel(p.sport)}</small><small className="t24-id" dir="ltr">{p.public_id}</small><small className="t24-player-rating-mini">⭐ {playerSeasonRating(p.id).average===null?'—':playerSeasonRating(p.id).average.toFixed(1)+'/10'} • 2026/2027</small></div><button type="button" className="outline-button" onClick={()=>setViewedPlayer(p)}>{t('شوف البروفيل والتصاور','Voir le profil et les photos')}</button></div>)}</div>}</>}
 
       {activeTab==='profile'&&<><section className="profile-cover"><div className="profile-cover-pattern"/><span>MY PLAYER PROFILE</span></section>{!user?<div className="t24-empty" >{t('إعمل حساب باش تعمل بطاقة لاعب متاعك.','Crée un compte pour avoir ta carte de joueur.')}<button className="primary-button" onClick={()=>setAuthOpen(true)}>{t('إنشاء حساب / دخول','Inscription / Connexion')}</button></div>:
-        <><div className="profile-head"><Avatar name={displayName} url={profile?.avatar_url}/><div><h1>{displayName} <ShieldCheck size={17}/></h1><p>{user.email || user.phone || 'حساب لاعب'} · {profile?.city || 'تونس'}</p><div className="t24-player-id"><strong>PLAYER ID</strong><code dir="ltr">{profile?.public_id || '...'}</code><button type="button" onClick={()=>navigator.clipboard?.writeText(profile?.public_id||'')}>{t('نسخ ID','Copier ID')}</button></div><div className="profile-tags"><span>{profile?.position || 'لاعب'}</span><span>{sports[profile?.sport]?.label || 'Foot'}</span></div></div><button className="outline-button" onClick={openProfileEditor}><Pencil size={16}/>{t('تعديل الملف','Modifier le profil')}</button></div>
+        <><div className="profile-head"><Avatar name={displayName} url={profile?.avatar_url}/><div><h1>{displayName} <ShieldCheck size={17}/></h1><p>{user.email || user.phone || t('حساب لاعب','Compte joueur')} · {profile?.city || t('تونس','Tunisie')}</p><div className="t24-player-id"><strong>PLAYER ID</strong><code dir="ltr">{profile?.public_id || '...'}</code><button type="button" onClick={()=>navigator.clipboard?.writeText(profile?.public_id||'')}>{t('نسخ ID','Copier ID')}</button></div><div className="profile-tags"><span>{profile?.position || t('لاعب','Joueur')}</span><span>{sportLabel(profile?.sport) || 'Foot'}</span></div></div><button className="outline-button" onClick={openProfileEditor}><Pencil size={16}/>{t('تعديل الملف','Modifier le profil')}</button></div>
         <div className="profile-bio"><span className="bio-sport-icon">{sports[profile?.sport]?.icon || '⚽'}</span><p>{profile?.bio || t('أضف نبذة على روحك الرياضية.','Ajoute une description sportive sur ton profil.')}</p></div>
         <div className="profile-stats"><div><strong>{lineup.filter(l=>l.player_id===user.id&&l.status==='confirmed').length}</strong><small>{t('ماتش شاركت فيه','Matchs disputés')}</small></div><div><strong>{matches.filter(m=>m.host_id===user.id).length}</strong><small>{t('ماتش نظّمتو','Matchs créés')}</small></div></div>
         <div className="t24-season-profile"><div><span>SEASON 2026/2027</span><h3>{t('تقييم الموسم','Note de la saison')}</h3></div><strong>⭐ {playerSeasonRating(user.id).average===null?'—':playerSeasonRating(user.id).average.toFixed(1)+'/10'}</strong><small>{playerSeasonRating(user.id).count} {t('تقييمات','notes')} • {playerSeasonRating(user.id).matches} {t('ماتشات','matchs')}</small></div>
@@ -532,13 +532,13 @@ export default function App() {
 
     {viewedPlayer&&<PlayerProfileModal player={viewedPlayer} lang={lang} onClose={()=>setViewedPlayer(null)}/>}
     {authOpen && <AuthModal lang={lang} onClose={()=>setAuthOpen(false)}/>}
-    {passwordRecovery && <div className="modal-backdrop"><form className="create-modal" onSubmit={async e=>{e.preventDefault();setBusy(true);const {error:passwordError}=await supabase.auth.updateUser({password:e.target.password.value});setBusy(false);if(passwordError)notice(passwordError.message);else{setPasswordRecovery(false);notice('تبدّلت كلمة السر بنجاح')}}}><div className="modal-head"><h2>كلمة سر جديدة</h2><button type="button" className="icon-button" onClick={()=>setPasswordRecovery(false)}><X/></button></div><label className="field-label">كلمة السر<input type="password" minLength="6" name="password" required /></label><button className="primary-button" disabled={busy}>تأكيد</button></form></div>}
+    {passwordRecovery && <div className="modal-backdrop"><form className="create-modal" onSubmit={async e=>{e.preventDefault();setBusy(true);const {error:passwordError}=await supabase.auth.updateUser({password:e.target.password.value});setBusy(false);if(passwordError)notice(passwordError.message);else{setPasswordRecovery(false);notice(t('تبدّلت كلمة السر بنجاح','Mot de passe modifié avec succès'))}}}><div className="modal-head"><h2>{t('كلمة سر جديدة','Nouveau mot de passe')}</h2><button type="button" className="icon-button" onClick={()=>setPasswordRecovery(false)}><X/></button></div><label className="field-label">{t('كلمة السر','Mot de passe')}<input type="password" minLength="6" name="password" autoComplete="new-password" required /></label><button className="primary-button" disabled={busy}>{t('تأكيد','Confirmer')}</button></form></div>}
 
     {newMatchOpen&&<div className="modal-backdrop" onMouseDown={e=>e.target===e.currentTarget&&setNewMatchOpen(false)}>
       <form className="create-modal t24-create-match-modal" onSubmit={createMatch}>
         <div className="modal-head"><div><span className="eyebrow">CREATE MATCH</span><h2>{t('كوّن الماتش والتشكيلة','Créer un match & sa composition')}</h2><p>{t('إختار اللاعبين والبدلاء، وشوف التيران يتبدّل قدّامك.','Choisis les titulaires, le gardien et les remplaçants.')}</p></div><button type="button" className="icon-button" onClick={()=>setNewMatchOpen(false)}><X/></button></div>
         <label className="field-label">{t('الرياضة','Sport')}<select value={form.sport} onChange={e=>setForm({...form,sport:e.target.value})}>{Object.entries(sports).map(([id,z])=><option key={id} value={id}>{sportLabel(id)}</option>)}</select></label>
-        <label className="field-label">{t('إسم الماتش','Nom du match')}<input value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="ماتش صحاب الجمعة"/></label>
+        <label className="field-label">{t('إسم الماتش','Nom du match')}<input value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder={t('ماتش صحاب الجمعة','Match entre amis')}/></label>
         <div className="form-two"><label className="field-label">{t('الملعب','Terrain')}<input required value={form.venue} onChange={e=>setForm({...form,venue:e.target.value})}/></label><label className="field-label">{t('المدينة','Ville')}<input required value={form.area} onChange={e=>setForm({...form,area:e.target.value})}/></label></div>
         <div className="form-two"><label className="field-label">{t('التاريخ','Date')}<input type="date" required value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></label><label className="field-label">{t('الساعة','Heure')}<input type="time" required value={form.time} onChange={e=>setForm({...form,time:e.target.value})}/></label></div>
         <label className="field-label">{t('المستوى','Niveau')}<select value={form.skill_level} onChange={e=>setForm({...form,skill_level:e.target.value})}>{['مفتوح','مبتدئ','متوسط','متقدم'].map((v,i)=><option key={v} value={v}>{lang==='fr'?['Ouvert','Débutant','Intermédiaire','Avancé'][i]:v}</option>)}</select></label>
@@ -558,26 +558,26 @@ export default function App() {
           <div><b>TEAM B</b><span>{currentMatch.opponent_id?<><Avatar name={nameOf(currentMatch.opponent_id)} url={avatarOf(currentMatch.opponent_id)} small/>{nameOf(currentMatch.opponent_id)}</>:'⚔️ يستنّى مسؤول المنافس'}</span></div>
         </div>
         {currentMatch.host_id===user?.id&& !currentMatch.opponent_id&&<div className="t24-challenge-inbox"><h3>{t('⚔️ طلبات التحدّي','⚔️ Demandes de défi')}</h3>
-          {currentChallenges.filter(c=>c.status==='pending').length===0&&<p>ما فماش طلب تحدّي توا.</p>}
+          {currentChallenges.filter(c=>c.status==='pending').length===0&&<p>{t('ما فماش طلب تحدّي توا.','Aucune demande de défi pour le moment.')}</p>}
           {currentChallenges.filter(c=>c.status==='pending').map(c=><div className="t24-challenge-row" key={c.id}>
             <Avatar name={nameOf(c.challenger_id)} url={avatarOf(c.challenger_id)} small/>
             <div><strong>{nameOf(c.challenger_id)}</strong><small dir="ltr">{players.find(p=>p.id===c.challenger_id)?.public_id}</small></div>
-            <button disabled={busy} onClick={()=>respondChallenge(c,true)}>قبول</button><button disabled={busy} onClick={()=>respondChallenge(c,false)}>رفض</button>
+            <button disabled={busy} onClick={()=>respondChallenge(c,true)}>{t('قبول','Accepter')}</button><button disabled={busy} onClick={()=>respondChallenge(c,false)}>{t('رفض','Refuser')}</button>
           </div>)}
         </div>}
-        {currentMatch.host_id!==user?.id&&!currentMatch.opponent_id&&<div className="t24-challenge-inbox"><h3>⚔️ تحدّي مسؤول فريق A</h3>
-          {ownChallenges.some(c=>c.match_id===currentMatch.id&&c.status==='pending')?<p>طلبك تبعث، نستناو مسؤول الفريق يقبلو.</p>:
-          <button type="button" className="primary-button" disabled={busy} onClick={()=>requestChallenge(currentMatch)}>ابعث طلب مقابلة ضد Team A</button>}
+        {currentMatch.host_id!==user?.id&&!currentMatch.opponent_id&&<div className="t24-challenge-inbox"><h3>{t('⚔️ تحدّي مسؤول فريق A','⚔️ Défier le capitaine A')}</h3>
+          {ownChallenges.some(c=>c.match_id===currentMatch.id&&c.status==='pending')?<p>{t('طلبك تبعث، نستناو مسؤول الفريق يقبلو.','Défi envoyé. En attente de la réponse du capitaine.')}</p>:
+          <button type="button" className="primary-button" disabled={busy} onClick={()=>requestChallenge(currentMatch)}>{t('ابعث طلب مقابلة ضد Team A','Envoyer un défi à l’équipe A')}</button>}
         </div>}
         {user&&(canManageTeam(currentMatch,'A')||canManageTeam(currentMatch,'B'))&&
           <div className="t24-challenge-inbox"><h3>{t('🤝 طلبات اللعب مع فريقك','🤝 Demandes pour rejoindre ton équipe')}</h3>
-            {activeTeamRequests.filter(q=>canManageTeam(currentMatch,q.team)).length===0&&<p>ما فماش طلبات جديدة في فريقك توا.</p>}
+            {activeTeamRequests.filter(q=>canManageTeam(currentMatch,q.team)).length===0&&<p>{t('ما فماش طلبات جديدة في فريقك توا.','Aucune nouvelle demande pour cette équipe.')}</p>}
             {activeTeamRequests.filter(q=>canManageTeam(currentMatch,q.team)).map(q=><div className="t24-challenge-row" key={q.id}>
               <button type="button" className="t24-player-open" onClick={()=>setViewedPlayer(players.find(p=>p.id===q.player_id))}>
                 <Avatar name={nameOf(q.player_id)} url={avatarOf(q.player_id)} small/></button>
-              <div><strong>{nameOf(q.player_id)}</strong><small>طالب يدخل Team {q.team}</small></div>
+              <div><strong>{nameOf(q.player_id)}</strong><small>{t('طالب يدخل Team ','Souhaite rejoindre l’équipe ')}{q.team}</small></div>
               <button disabled={busy} onClick={()=>decideTeamRequest(q,true)}>{t('قبول في الفريق','Accepter dans l’équipe')}</button>
-              <button disabled={busy} onClick={()=>decideTeamRequest(q,false)}>رفض</button>
+              <button disabled={busy} onClick={()=>decideTeamRequest(q,false)}>{t('رفض','Refuser')}</button>
             </div>)}
           </div>}
         {user&&currentMatch.host_id!==user.id&&currentMatch.opponent_id!==user.id&&<div className="t24-team-join-actions">
@@ -606,15 +606,15 @@ export default function App() {
             }
             setTargetSlot({team,slot})
           }}/>
-        <div className="t24-participants"><h3>{t('التشكيلة','Composition')} ({participants.filter(x=>x.status==='confirmed').length}/{currentMatch.total_players} موافقين)</h3>
+        <div className="t24-participants"><h3>{t('التشكيلة','Composition')} ({participants.filter(x=>x.status==='confirmed').length}/{currentMatch.total_players} {t('موافقين','confirmés')})</h3>
           {participants.map(entry=><div key={entry.id} className={'t24-roster-row t24-roster-'+entry.status}>
             <Avatar small name={nameOf(entry.player_id)} url={avatarOf(entry.player_id)}/>
-            <span>{nameOf(entry.player_id)}<small>{entry.status==='invited'?' • ⏳ يستنّى الموافقة':entry.status==='declined'?' • ❌ رفض الدعوة':' • ✅ موافق'}</small></span>
+            <span>{nameOf(entry.player_id)}<small>{entry.status==='invited'?t(' • ⏳ يستنّى الموافقة',' • ⏳ En attente'):entry.status==='declined'?t(' • ❌ رفض الدعوة',' • ❌ Refusé'):t(' • ✅ موافق',' • ✅ Confirmé')}</small></span>
             {canManageTeam(currentMatch,entry.team)&&<>
               <select value={entry.slot} disabled={busy||entry.status==='declined'} aria-label="المركز" onChange={e=>changeLineupSlot(entry,entry.team,Number(e.target.value))}>
                 {Array.from({length:Number(currentMatch.outfield_per_team||6)+1+Number(currentMatch.bench_per_team||0)},(_,i)=><option key={i} value={i}>{i===0?'GK':i<=Number(currentMatch.outfield_per_team||6)?'P'+i:'Banc '+(i-Number(currentMatch.outfield_per_team||6)-1)}</option>)}
               </select>
-              <button type="button" disabled={busy} onClick={()=>removeInvitation(entry)}>بدّل</button>
+              <button type="button" disabled={busy} onClick={()=>removeInvitation(entry)}>{t('بدّل','Changer')}</button>
             </>}
           </div>)}
         </div>
