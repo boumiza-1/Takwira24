@@ -7,6 +7,7 @@ import FormationPitch from './components/FormationPitch'
 import PlayerSearchModal from './components/PlayerSearchModal'
 import PlayerProfileModal from './components/PlayerProfileModal'
 import ShareMatchPanel from './components/ShareMatchPanel'
+import MatchResults from './components/MatchResults'
 import NotificationsPanel from './components/NotificationsPanel'
 import './app-mobile.css'
 
@@ -41,6 +42,8 @@ export default function App() {
   const [targetSlot, setTargetSlot] = useState(null)
   const [challenges, setChallenges] = useState([])
   const [joinRequests,setJoinRequests] = useState([])
+  const [votes,setVotes] = useState([])
+  const [lang,setLang] = useState('ar')
   const [viewedPlayer,setViewedPlayer] = useState(null)
   const [activeTab, setActiveTab] = useState('home')
   const [sport, setSport] = useState('all')
@@ -54,6 +57,11 @@ export default function App() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  const t=(ar,fr)=>lang==='fr'?fr:ar
+  useEffect(()=>{
+    document.documentElement.lang=lang
+    document.documentElement.dir=lang==='fr'?'ltr':'rtl'
+  },[lang])
   const notice = message => { setToast(message); setTimeout(() => setToast(''), 3600) }
   const displayName = profile?.display_name || user?.user_metadata?.display_name || user?.user_metadata?.full_name || 'لاعب جديد'
   const visible = useMemo(() => matches.filter(m =>
@@ -98,14 +106,15 @@ export default function App() {
     try {
       const own = await ensureProfile(current)
       setProfile(own)
-      const [peopleResult, gamesResult, lineupResult, challengesResult, joinRequestsResult] = await Promise.all([
+      const [peopleResult, gamesResult, lineupResult, challengesResult, joinRequestsResult, votesResult] = await Promise.all([
         supabase.from('t24_profiles').select('*').order('created_at', { ascending: false }).limit(200),
         supabase.from('t24_matches').select('*').order('starts_at', { ascending: true, nullsFirst: false }).limit(150),
         supabase.from('t24_lineup').select('*').limit(500),
         supabase.from('t24_challenges').select('*').order('created_at',{ascending:false}).limit(200),
-        supabase.from('t24_team_requests').select('*').order('created_at',{ascending:false}).limit(250)
+        supabase.from('t24_team_requests').select('*').order('created_at',{ascending:false}).limit(250),
+        supabase.from('t24_votes').select('*').limit(1000)
       ])
-      for (const item of [peopleResult, gamesResult, lineupResult, challengesResult, joinRequestsResult]) if (item.error) throw item.error
+      for (const item of [peopleResult, gamesResult, lineupResult, challengesResult, joinRequestsResult, votesResult]) if (item.error) throw item.error
       // Include every captain/invited player even if outside the latest 200 public profiles.
       // Without this, searched players could appear as anonymous placeholders on other devices.
       const people = peopleResult.data || []
@@ -125,13 +134,14 @@ export default function App() {
       setLineup(lineupResult.data || [])
       setChallenges(challengesResult.data || [])
       setJoinRequests(joinRequestsResult.data||[])
+      setVotes(votesResult.data||[])
     } catch (cause) {
       setError(cause.message || 'صار مشكل في الاتصال بقاعدة البيانات.')
     } finally { setLoading(false) }
   }
   useEffect(() => {
     if (user) { setError(''); refreshData(user) }
-    else { setProfile(null); setPlayers([]); setMatches([]); setLineup([]); setChallenges([]); setJoinRequests([]); setSelectedMatch(null); setViewedPlayer(null) }
+    else { setProfile(null); setPlayers([]); setMatches([]); setLineup([]); setChallenges([]); setJoinRequests([]); setVotes([]); setSelectedMatch(null); setViewedPlayer(null) }
   }, [user?.id])
 
   useEffect(() => {
@@ -186,7 +196,7 @@ export default function App() {
         id: user.id, display_name: (draft.display_name || '').trim() || 'لاعب',
         city: draft.city || '', sport: draft.sport || 'football',
         position: draft.position || '', bio: draft.bio || '',
-        avatar_url: draft.avatar_url || null, updated_at: new Date().toISOString()
+        avatar_url: profile?.avatar_url || null, updated_at: new Date().toISOString()
       }
       const { data, error: updateError } = await supabase.from('t24_profiles').upsert(payload).select().single()
       if (updateError) throw updateError
@@ -206,6 +216,27 @@ export default function App() {
       if (!occupied.some(l => l.team === team && l.slot === slot)) return { team, slot }
     }
     return null
+  }
+
+
+  async function addCaptainToField(match,team){
+    if(!user)return
+    const isOwn=(team==='A'&&match.host_id===user.id)||(team==='B'&&match.opponent_id===user.id)
+    if(!isOwn||match.status!=='open'){notice(t('الماتش مسكّر أو الفريق موش متاعك.','Match fermé ou équipe non autorisée.'));return}
+    if(lineup.some(e=>e.match_id===match.id&&e.player_id===user.id)){
+      notice(t('إنت موجود بالفعل في التشكيلة.','Tu es déjà dans la composition.'));return
+    }
+    const slots=Number(match.outfield_per_team||6)+1+Number(match.bench_per_team||0)
+    const free=Array.from({length:slots},(_,i)=>i).find(i=>!lineup.some(row=>row.match_id===match.id&&row.team===team&&row.slot===i))
+    if(free===undefined){notice(t('الفريق معمّر.','Équipe complète.'));return}
+    setBusy(true)
+    try{
+      const {error:joinError}=await supabase.from('t24_lineup').insert({match_id:match.id,player_id:user.id,team,slot:free,status:'confirmed'})
+      if(joinError)throw joinError
+      await refreshData(user)
+      notice(t('تضفت للتشكيلة كمشارك مؤكّد!','Tu es ajouté à la composition comme titulaire confirmé !'))
+    }catch(cause){notice(cause.message)}
+    finally{setBusy(false)}
   }
 
   // Every participant must be invited by their own team captain.
@@ -405,6 +436,13 @@ export default function App() {
   const findPlayer = id => players.find(p => p.id === id)
   const avatarOf = id => findPlayer(id)?.avatar_url
   const nameOf = id => findPlayer(id)?.display_name || 'لاعب'
+  const season='2026/2027'
+  const completedGames=matches.filter(m=>m.status==='completed'&&m.season===season)
+  const playerSeasonRating=id=>{
+    const matchIds=new Set(completedGames.filter(m=>lineup.some(l=>l.match_id===m.id&&l.player_id===id&&l.status==='confirmed')).map(m=>m.id))
+    const scores=votes.filter(v=>v.player_id===id&&matchIds.has(v.match_id)).map(v=>Number(v.score))
+    return {average:scores.length?(scores.reduce((a,b)=>a+b,0)/scores.length):null,count:scores.length,matches:matchIds.size}
+  }
   const ownInvitations = lineup.filter(l => l.player_id === user?.id && l.status === 'invited')
   const ownChallenges = challenges.filter(c=>c.challenger_id===user?.id)
   const ownJoinRequests=joinRequests.filter(q=>q.player_id===user?.id)
@@ -479,7 +517,8 @@ export default function App() {
         <><div className="profile-head"><Avatar name={displayName} url={profile?.avatar_url}/><div><h1>{displayName} <ShieldCheck size={17}/></h1><p>{user.email || user.phone || 'حساب لاعب'} · {profile?.city || 'تونس'}</p><div className="t24-player-id"><strong>PLAYER ID</strong><code dir="ltr">{profile?.public_id || '...'}</code><button type="button" onClick={()=>navigator.clipboard?.writeText(profile?.public_id||'')}>نسخ ID</button></div><div className="profile-tags"><span>{profile?.position || 'لاعب'}</span><span>{sports[profile?.sport]?.label || 'Foot'}</span></div></div><button className="outline-button" onClick={openProfileEditor}><Pencil size={16}/> تعديل الملف</button></div>
         <div className="profile-bio"><span className="bio-sport-icon">{sports[profile?.sport]?.icon || '⚽'}</span><p>{profile?.bio || 'أضف نبذة على روحك الرياضية.'}</p></div>
         <div className="profile-stats"><div><strong>{lineup.filter(l=>l.player_id===user.id&&l.status==='confirmed').length}</strong><small>ماتش شاركت فيه</small></div><div><strong>{matches.filter(m=>m.host_id===user.id).length}</strong><small>ماتش نظّمتو</small></div></div>
-        <MediaModeration user={user} onProfileChanged={()=>refreshData(user)}/>
+        <div className="t24-season-profile"><div><span>SEASON 2026/2027</span><h3>{t('تقييم الموسم','Note de la saison')}</h3></div><strong>⭐ {playerSeasonRating(user.id).average===null?'—':playerSeasonRating(user.id).average.toFixed(1)+'/10'}</strong><small>{playerSeasonRating(user.id).count} {t('تقييمات','notes')} • {playerSeasonRating(user.id).matches} {t('ماتشات','matchs')}</small></div>
+        <MediaModeration user={user} lang={lang} onProfileChanged={()=>refreshData(user)}/>
         <button className="outline-button" type="button" onClick={()=>setViewedPlayer(profile)}>👀 شوف البروفيل متاعي كيما يظهر للناس</button></>}</>}
       <footer className="footer"><span>© 2026 Takwira24</span><span>اللعبة تجمعنا 💚</span><span>{isSupabaseConfigured?'SUPABASE':'CONFIGURATION REQUIRED'}</span></footer>
     </main>
@@ -544,7 +583,9 @@ export default function App() {
               onClick={()=>requestChallenge(currentMatch)}>⚔️ نطلب تحدّي ضد Team A</button>}</div>
           {ownJoinRequests.filter(q=>q.match_id===currentMatch.id).map(q=><p key={q.id}>طلب اللعب مع Team {q.team}: {q.status==='pending'?'⏳ يستنّى المسؤول':q.status==='accepted'?'✅ مقبول':'❌ مرفوض'}</p>)}
         </div>}
+        <div className="t24-captain-self-pick">{user&&currentMatch.status==='open'&&(['A','B'].some(team=>canManageTeam(currentMatch,team)))&& !lineup.some(row=>row.match_id===currentMatch.id&&row.player_id===user.id)&&<button type="button" className="primary-button" disabled={busy} onClick={()=>addCaptainToField(currentMatch,canManageTeam(currentMatch,'A')?'A':'B')}>⚽ {t('حطّ روحي في التشكيلة','Me placer dans la composition')}</button>}</div>
         <ShareMatchPanel match={currentMatch} lineup={lineup}/>
+        <MatchResults match={currentMatch} entries={participants} players={players} user={user} lang={lang} onChanged={()=>refreshData(user)}/>
         <FormationPitch outfield={currentMatch.outfield_per_team||6} bench={currentMatch.bench_per_team||0} sport={currentMatch.sport}
           entries={participants} players={players} busy={busy}
           canEdit={canManageTeam(currentMatch,'A')||canManageTeam(currentMatch,'B')}
