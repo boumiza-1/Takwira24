@@ -148,3 +148,48 @@ border-radius:22px;box-shadow:0 18px 45px #0b231b3d}
 .t24-lineup-modal{max-width:780px;width:min(780px,100%)}
 @media(max-width:800px){.hero-card{min-height:255px}.t24-sports-covers{gap:9px}.t24-sport-tile{min-height:115px;padding:12px}.t24-sport-tile>span{font-size:28px;margin-left:5px}.t24-sport-tile strong{font-size:12px}.t24-sport-tile small{font-size:10px}.t24-cover-football{font-size:65px}.t24-cover-handball{font-size:38px}}
 @media(max-width:370px){.t24-sports-covers{grid-template-columns:1fr}.hero-card{min-height:260px}}
+
+
+/* Accessible player search, captain challenges and identity cards */
+.t24-player-id{margin:12px 0;display:flex;align-items:center;gap:8px;background:#ebf5e6;border:1px solid #d8edc6;border-radius:13px;padding:10px 13px;flex-wrap:wrap}
+.t24-player-id strong{font-family:'DM Sans',sans-serif;color:#527b44;font-size:10px;letter-spacing:1px}
+.t24-player-id code,.t24-id{direction:ltr;font-size:12px;color:#164c34;font-weight:800}
+.t24-player-id button{margin-right:auto;border:0;border-radius:8px;background:#bfec82;color:#244321;padding:6px 12px;font-size:12px;font-weight:800}
+.t24-captain-labels{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0 20px}
+.t24-captain-labels>div{background:#eef9e5;padding:10px;border:1px solid #d2e9bf;border-radius:12px;min-width:0}
+.t24-captain-labels>div:nth-child(2){background:#edf5ff;border-color:#cfe0f6}
+.t24-captain-labels b{display:block;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:1px;color:#37663e;margin-bottom:6px}
+.t24-captain-labels>div:nth-child(2) b{color:#42698c}
+.t24-captain-labels span{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:#37513e}
+.t24-captain-labels .avatar{width:27px;height:27px}
+.t24-challenge-inbox{background:#f5f8fd;border:1px solid #cfddeb;border-radius:13px;margin:15px 0;padding:13px}
+.t24-challenge-inbox h3{font-size:14px;margin:4px 0 13px}
+.t24-challenge-inbox p{font-size:12px;color:#66738a}
+.t24-challenge-row{display:flex;align-items:center;gap:7px;padding:10px 0;border-top:1px solid #e0e8ed;flex-wrap:wrap}
+.t24-challenge-row>div{display:flex;flex-direction:column;gap:3px;flex:1;min-width:120px;font-size:12px}
+.t24-challenge-row small{font-size:10px;color:#6c8190}
+.t24-challenge-row button{border:0;border-radius:8px;padding:8px 12px;background:#b9eb8a;color:#17412c;font-weight:800}
+.t24-challenge-row button:last-child{background:#ffe4e2;color:#933c3c}
+.t24-roster-row.t24-roster-invited .avatar{opacity:.45}
+.t24-roster-row.t24-roster-declined{background:#fff0f0;border:1px solid #f3b8ba;border-radius:9px}
+.t24-roster-row.t24-roster-declined .avatar{box-shadow:0 0 0 2px #dc4249}
+.t24-roster-row.t24-roster-declined small{color:#bd333a}
+.t24-roster-row button{border:1px solid #d0ded2;background:#f2f6f3;color:#325237;border-radius:8px;font-size:11px;font-weight:800;padding:7px}
+.t24-search-overlay{position:fixed;z-index:10000;inset:0;background:#091a13b8;display:flex;align-items:center;justify-content:center;padding:12px}
+.t24-player-search{width:min(480px,100%);max-height:85dvh;overflow-y:auto;background:white;border-radius:21px;padding:18px;box-shadow:0 20px 65px #0006;direction:rtl}
+.t24-search-title{display:flex;align-items:start;justify-content:space-between;gap:10px}
+.t24-search-title h3{margin:5px 0;font-size:19px}
+.t24-search-title small{color:#697b6b;font-size:12px}
+.t24-player-search-box{display:flex;align-items:center;gap:8px;background:#f7fbf6;border:2px solid #9bce77;border-radius:11px;padding:5px 11px;margin:20px 0 10px}
+.t24-player-search-box input{width:100%;border:0;background:transparent;height:42px;font-size:14px;outline:0}
+.t24-search-hint{display:flex;gap:6px;align-items:center;font-size:11px;color:#66816e;margin:6px 0 16px;line-height:1.7}
+.t24-player-search-results{display:flex;flex-direction:column;gap:8px;min-height:90px}
+.t24-search-result{display:flex;align-items:center;gap:10px;background:#f7faf6;border:1px solid #e6efe3;border-radius:14px;padding:9px}
+.t24-search-avatar{width:47px;height:47px;border-radius:50%;display:grid;place-items:center;background:#dcf4d0;color:#44734a;flex-shrink:0;overflow:hidden}
+.t24-search-avatar img{width:100%;height:100%;object-fit:cover}
+.t24-search-person{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
+.t24-search-person strong{font-size:13px}
+.t24-search-person small{font-size:10px;color:#708270}
+.t24-invite-btn{display:flex;align-items:center;gap:5px;border:0;border-radius:9px;background:#bdef7e;color:#24442b;padding:8px 11px;font-weight:800;font-size:11px}
+.t24-invite-btn:disabled{background:#dfe6de;color:#7e8c7e}
+@media(max-width:450px){.t24-captain-labels{gap:5px}.t24-captain-labels>div{padding:8px}.t24-player-search{padding:13px}.t24-search-person strong{font-size:12px}.t24-challenge-row>div{min-width:95px}}
