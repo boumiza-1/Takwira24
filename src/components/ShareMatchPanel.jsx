@@ -33,10 +33,10 @@ export default function ShareMatchPanel({ match, lineup = [], canShare = true,la
   const state = getMatchStage(match,lineup)
   const url = shareUrl(match.id)
   const text = state.stage === 'match_ready'
-    ? '⚽ الماتش جاهز! زوز فرق تأكدوا في Takwira24: '+match.title+' — '+match.venue+'، '+match.area+'.'
+    ?t('⚽ الماتش جاهز! زوز فرق تأكدوا في Takwira24: ','⚽ Le match est prêt, les deux équipes sont confirmées : ')+match.title+' — '+match.venue+'، '+match.area+'.'
     : state.aReady
-    ? '⚔️ Team A جاهزة! نلوجوا على Team B باش تتحدّانا في Takwira24: '+match.title+' — '+match.venue+'، '+match.area+'.'
-    : '⚽ ماتش جديد على Takwira24: '+match.title+' — '+match.venue+'، '+match.area+'. إفتح الرابط وشوف التشكيلة واطلب تلعب معانا.'
+    ?t('⚔️ Team A جاهزة! نلوجوا على Team B باش تتحدّانا في Takwira24: ','⚔️ Équipe A prête ! On cherche une équipe B pour un défi : ')+match.title+' — '+match.venue+'، '+match.area+'.'
+    :t('⚽ ماتش جديد على Takwira24: ','⚽ Nouveau match sur Takwira24 : ')+match.title+' — '+match.venue+'، '+match.area+'. '+t('إفتح الرابط وشوف التشكيلة واطلب تلعب معانا.','Ouvre le lien pour voir le terrain et participer.')
 
   async function share() {
     try {
