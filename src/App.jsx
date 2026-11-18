@@ -184,6 +184,16 @@ export default function App() {
     finally { setBusy(false) }
   }
 
+  function freePitchSlot(matchId) {
+    const occupied = lineup.filter(l => l.match_id === matchId && l.status !== 'declined')
+    for (const team of ['A','B']) {
+      for (let slot = 0; slot <= 10; slot++) {
+        if (!occupied.some(l => l.team === team && l.slot === slot)) return { team, slot }
+      }
+    }
+    return null
+  }
+
   async function joinMatch(match) {
     if (!requireLogin()) return
     const existing = lineup.find(l => l.match_id === match.id && l.player_id === user.id)
@@ -191,9 +201,11 @@ export default function App() {
     if (lineup.filter(l => l.match_id === match.id && l.status === 'confirmed').length >= match.total_players) {
       notice('التشكيلة كاملة'); return
     }
+    const pitchSlot = freePitchSlot(match.id)
+    if (!pitchSlot) { notice('المراكز الكل معمّرة'); return }
     setBusy(true)
     try {
-      const { error: joinError } = await supabase.from('t24_lineup').insert({match_id:match.id, player_id:user.id, team:'A', slot:0, status:'confirmed'})
+      const { error: joinError } = await supabase.from('t24_lineup').insert({match_id:match.id, player_id:user.id, ...pitchSlot, status:'confirmed'})
       if (joinError) throw joinError
       setSelectedMatch(match.id)
       await refreshData(user)
@@ -206,10 +218,12 @@ export default function App() {
     const game = matches.find(m => m.id === selectedMatch)
     if (!game || game.host_id !== user?.id) { notice('كان منظّم الماتش ينجم يبعث الدعوات'); return }
     if (lineup.some(l => l.match_id === game.id && l.player_id === player.id)) { notice('اللاعب موجود في التشكيلة'); return }
+    const pitchSlot = freePitchSlot(game.id)
+    if (!pitchSlot) { notice('المراكز الكل معمّرة'); return }
     setBusy(true)
     try {
       const { error: inviteError } = await supabase.from('t24_lineup').insert({
-        match_id: game.id, player_id: player.id, team:'A', slot:0, status:'invited'
+        match_id: game.id, player_id: player.id, ...pitchSlot, status:'invited'
       })
       if (inviteError) throw inviteError
       await refreshData(user)
@@ -233,9 +247,12 @@ export default function App() {
     if (!user || !selectedMatch) return
     const game = matches.find(m => m.id === selectedMatch)
     if (game?.host_id !== user.id && entry.player_id !== user.id) return
+    const taken = lineup.filter(l => l.match_id === selectedMatch && l.id !== entry.id && l.team === team).map(l=>l.slot)
+    const safeSlot = taken.includes(slot) ? Array.from({length:11},(_,i)=>i).find(i=>!taken.includes(i)) : slot
+    if (safeSlot === undefined) { notice('الفريق هذا معمّر'); return }
     setBusy(true)
     try {
-      const { error: slotError } = await supabase.from('t24_lineup').update({team,slot}).eq('id',entry.id)
+      const { error: slotError } = await supabase.from('t24_lineup').update({team,slot:safeSlot}).eq('id',entry.id)
       if (slotError) throw slotError
       await refreshData(user)
     } catch(cause) { notice('ما نجّمش نبدّل المركز: '+cause.message) }
