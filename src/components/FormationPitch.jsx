@@ -16,15 +16,16 @@ function teamFormation(outfield) {
 
 export default function FormationPitch({
   outfield = 6, bench = 0, sport = 'football', entries = [], players = [],
-  onSelectSlot, canEdit = false, busy = false
+  onSelectSlot, canEdit = false, busy = false, lang='ar'
 }) {
+  const t=(ar,fr)=>lang==='fr'?fr:ar
   const startCount = Number(outfield) + 1
   const benchCount = Number(bench)
   const coords = useMemo(() => teamFormation(Number(outfield)), [outfield])
   const lookup = id => players.find(p=>p.id===id)
   const lookupEntry = (team,slot) => entries.find(e=>e.team===team && e.slot===slot)
   return <div className="tf-shell" dir="rtl">
-    <div className="tf-headline"><div><span className="tf-overline">MATCH DAY • FORMATION</span><h3>تشكيلة الفريقين</h3></div><div className="tf-head-count"><Users size={15}/><b>{startCount} × 2</b><small>أساسيين لكل فريق</small></div></div>
+    <div className="tf-headline"><div><span className="tf-overline">MATCH DAY • FORMATION</span><h3>{t('تشكيلة الفريقين','Compositions des équipes')}</h3></div><div className="tf-head-count"><Users size={15}/><b>{startCount} × 2</b><small>{t('أساسيين لكل فريق','Titulaires par équipe')}</small></div></div>
     <div className={'tf-stadium tf-'+sport}>
       <div className="tf-lawn">
         <div className="tf-mark tf-outline"/>
@@ -45,7 +46,7 @@ export default function FormationPitch({
             return <button key={team+'-'+slot} type="button"
               className={'tf-slot '+(occupied?'tf-slot-occupied ':'')+(team==='B'?'tf-slot-blue':'')+(slot===0?' tf-keeper':'')+' tf-state-'+state}
               style={{left:x+'%',top:flippedY+'%'}}
-              title={occupied?(person?.display_name||'لاعب')+' — '+(state==='invited'?'في انتظار الموافقة':state==='declined'?'رفض الدعوة':'مؤكّد'):'مكان فارغ — '+(slot===0?'Gardien':'Joueur')}
+              title={occupied?(person?.display_name||t('لاعب','Joueur'))+' — '+(state==='invited'?t('في انتظار الموافقة','En attente'):state==='declined'?t('رفض الدعوة','Refusé'):t('مؤكّد','Confirmé')):t('مكان فارغ — ','Place libre — ')+(slot===0?'Gardien':'Joueur')}
               disabled={busy || !canEdit}
               onClick={()=>onSelectSlot?.(team,slot,row)}
             >
@@ -61,17 +62,17 @@ export default function FormationPitch({
     </div>
     <div className="tf-benches">
       {['A','B'].map(team=><div key={team} className={'tf-bench tf-bench-'+team}>
-        <div className="tf-bench-title"><Shirt size={16}/> <strong>Banc {team}</strong><small>{benchCount} Remplaçants</small></div>
-        {benchCount===0?<span className="tf-no-bench">ما فماش بدلاء</span>:<div className="tf-bench-roster">{Array.from({length:benchCount},(_,idx)=>{
+        <div className="tf-bench-title"><Shirt size={16}/> <strong>Banc {team}</strong><small>{benchCount} {t('بدلاء','Remplaçants')}</small></div>
+        {benchCount===0?<span className="tf-no-bench">{t('ما فماش بدلاء','Pas de remplaçants')}</span>:<div className="tf-bench-roster">{Array.from({length:benchCount},(_,idx)=>{
           const slot=startCount+idx, row=lookupEntry(team,slot),person=lookup(row?.player_id)
           return <button type="button" disabled={!canEdit||busy} onClick={()=>onSelectSlot?.(team,slot,row)}
             className={'tf-bench-player tf-state-'+(row?.status||'empty')} key={slot} title={person?.display_name || 'بديل فارغ'}>
             <span className="tf-bench-avatar">{person?.avatar_url?<img src={person.avatar_url} alt={person.display_name||'بديل'}/>:row?<Shirt size={16}/>:<UserRoundPlus size={15}/>}</span>
-            <small>{person?.display_name||('بديل '+(idx+1))}</small>{row?.status==='invited'&&<small>⏳ انتظار</small>}{row?.status==='declined'&&<small>❌ رفض</small>}
+            <small>{person?.display_name||(t('بديل ','Remplaçant ')+(idx+1))}</small>{row?.status==='invited'&&<small>{t('⏳ انتظار','⏳ Attente')}</small>}{row?.status==='declined'&&<small>{t('❌ رفض','❌ Refusé')}</small>}
           </button>
         })}</div>}
       </div>)}
     </div>
-    <div className="tf-summary"><span>🧤 حارس + {outfield} لاعبين لكل فريق</span><span>🪑 {benchCount} بدلاء لكل فريق</span><span>👥 {2*(startCount+benchCount)} بلاصة في الماتش</span></div>
+    <div className="tf-summary"><span>🧤 {t('حارس + ','Gardien + ')}{outfield} {t('لاعبين لكل فريق','joueurs par équipe')}</span><span>🪑 {benchCount} {t('بدلاء لكل فريق','remplaçants par équipe')}</span><span>👥 {2*(startCount+benchCount)} {t('بلاصة في الماتش','places au total')}</span></div>
   </div>
 }
