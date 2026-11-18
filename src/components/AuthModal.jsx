@@ -42,17 +42,13 @@ export default function AuthModal({ onClose }) {
           options: { data: { display_name: name.trim() }, emailRedirectTo: redirect() }
         })
         if (signupError) throw signupError
-        if (data.user?.email_confirmed_at) onClose()
-        else setMessage('بعثنالك رسالة تفعيل. افتح الإيميل واضغط الرابط، وبعد ارجع اعمل Login. ثبّت في Spam زادة.')
+        if (data.session) onClose()
+        else setMessage('الحساب تسجّل، لكن Supabase مازالت تستوجب تأكيد الإيميل. يلزم المسؤول يعطّل Confirm Email من إعدادات المشروع إذا يحب دخول مباشر.')
       } else {
         const { data, error: loginError } = await supabase.auth.signInWithPassword({email:email.trim(), password})
         if (loginError) throw loginError
-        if (!data.user?.email_confirmed_at && !data.user?.phone_confirmed_at) {
-          await supabase.auth.signOut()
-          setError('يلزمك تثبّت الإيميل قبل الدخول. فتّش على رسالة التفعيل.')
-          return
-        }
-        onClose()
+        if(data.session) onClose()
+        else setError('تسجيل الدخول ما كملش. تثبّت من الإيميل وكلمة السر.')
       }
     } catch (cause) { setError(cause.message || 'صار خطأ. عاود جرّب.') }
     finally { setBusy(false) }
@@ -88,7 +84,7 @@ export default function AuthModal({ onClose }) {
 
   return <div className="modal-backdrop" onMouseDown={e=>e.target===e.currentTarget&&onClose()}>
     <div className="create-modal auth-modal">
-      <div className="modal-head"><div><span className="eyebrow">TAKWIRA24 — ACCOUNT</span><h2>حسابك الرياضي ⚽</h2><p>إختار طريقة الدخول، وفعّل حسابك قبل المشاركة.</p></div><button type="button" className="icon-button" onClick={onClose} aria-label="إغلاق"><X size={21}/></button></div>
+      <div className="modal-head"><div><span className="eyebrow">TAKWIRA24 — ACCOUNT</span><h2>حسابك الرياضي ⚽</h2><p>إعمل حساب بإيميل أو نمرة تليفون، وبعد إدخل للتشكيلة.</p></div><button type="button" className="icon-button" onClick={onClose} aria-label="إغلاق"><X size={21}/></button></div>
       <div className="t24-auth-methods">
         <button type="button" className={method==='email'?'chosen':''} onClick={()=>changeMethod('email')}><Mail size={17}/> بالإيميل</button>
         <button type="button" className={method==='phone'?'chosen':''} onClick={()=>changeMethod('phone')}><Phone size={17}/> بنمرة التليفون</button>
@@ -102,8 +98,8 @@ export default function AuthModal({ onClose }) {
           <span className="auth-input-icon"><LockKeyhole size={17}/><input type="password" required minLength="6" autoComplete={mode==='signup'?'new-password':'current-password'} dir="ltr" value={password} onChange={e=>setPassword(e.target.value)} placeholder="6 حروف على الأقل"/></span></label>}
         {error && <p role="alert" className="auth-error">{error}</p>}
         {message && <p role="status" className="auth-message">{message}</p>}
-        <button type="submit" disabled={busy} className="primary-button submit-match">{busy?'لحظة...':mode==='signup'?'إعمل حساب وتأكيد بالإيميل':mode==='reset'?'إبعث رابط الاسترجاع':'تسجيل الدخول'}</button>
-        <p className="t24-auth-tip"><ShieldCheck size={15}/> الإيميل لازم يتأكّد عبر رابط التفعيل.</p>
+        <button type="submit" disabled={busy} className="primary-button submit-match">{busy?'لحظة...':mode==='signup'?'إعمل حساب جديد':mode==='reset'?'إبعث رابط الاسترجاع':'تسجيل الدخول'}</button>
+        <p className="t24-auth-tip"><ShieldCheck size={15}/> الدخول المباشر يستوجب تعطيل Confirm Email من إعدادات Supabase؛ موش من التطبيق.</p>
         <div className="auth-switch">{mode==='signin' ? <>
           <button type="button" onClick={()=>changeMode('signup')}>ما عنديش حساب — نعمل جديد</button>
           <button type="button" onClick={()=>changeMode('reset')}>نسيت كلمة السر؟</button>
