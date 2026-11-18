@@ -1,6 +1,6 @@
 {
-  "name": "Takwira24",
-  "short_name": "Takwira24",
+  "name": "TAKWIRA24 — Football & Handball",
+  "short_name": "TAKWIRA24",
   "description": "لمّ أصحابك، كوّن فريقك والعب",
   "lang": "ar",
   "dir": "rtl",
@@ -9,13 +9,19 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f5f7f4",
-  "theme_color": "#10251c",
+  "theme_color": "#0b261a",
   "icons": [
+    {
+      "src": "./takwira24-logo.webp",
+      "sizes": "96x96",
+      "type": "image/webp",
+      "purpose": "any"
+    },
     {
       "src": "./takwira-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ]
 }
