@@ -1,0 +1,60 @@
+/* TAKWIRA24 • Matchday premium dashboard */
+.t24-matchday-dashboard{position:relative;margin:19px 0 30px;direction:inherit}
+.t24-matchday-title{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin:0 0 17px;flex-wrap:wrap}
+.t24-matchday-eyebrow{display:flex;gap:7px;align-items:center;font:900 10px 'DM Sans',sans-serif;letter-spacing:1.5px;color:#6b9a43}
+.t24-matchday-title h2{font-size:clamp(23px,2.5vw,32px);font-weight:900;color:#172f22;letter-spacing:-.65px;margin:9px 0 0;line-height:1.35}
+.t24-matchday-title h2 em{color:#639e37;font-style:normal}
+.t24-hub-season{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;background:#ecf7e6;border:1px solid #d6ebca;color:#42743b;border-radius:30px;padding:9px 12px;font:800 11px 'DM Sans',sans-serif}
+.t24-hub-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(285px,.94fr);gap:16px}
+.t24-hub-feature{min-width:0;min-height:392px;overflow:hidden;position:relative;isolation:isolate;display:flex;flex-direction:column;padding:22px 25px;border-radius:24px;color:#fff;border:1px solid #668f5c;background:linear-gradient(110deg,#0b1e18eb 0%,#0a271fb9 60%,#103d24a6 100%),url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JJJQx7uBtP724OZ2KWNMaPLMsw/84272c46-75d6-40b9-8b0e-f00460e8cae9.png") center/cover no-repeat;box-shadow:0 24px 55px #122e2140}
+.t24-hub-feature::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(ellipse at 90% 20%,#b1ee5b30,transparent 55%),linear-gradient(180deg,#06140d00 40%,#03171088)}
+.t24-hub-beam{position:absolute;top:-70px;right:-35px;width:285px;height:230px;border-radius:50%;background:#b5f77538;filter:blur(72px);pointer-events:none}
+.t24-hub-feature-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:relative;z-index:1}
+.t24-hub-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid #c5fb7a53;background:#c4f76a25;color:#d8ffae;padding:7px 12px;border-radius:40px;font-size:11px;font-weight:900}
+.t24-hub-kicker{font:800 9px 'DM Sans',sans-serif;letter-spacing:1px;color:#e4f6c1a6}
+.t24-hub-game-hero{flex:1;display:flex;justify-content:space-between;align-items:center;gap:18px;position:relative;z-index:1;padding:20px 0 12px}
+.t24-hub-game-text{min-width:0;flex:1}
+.t24-hub-game-text>small{font:900 11px 'DM Sans',sans-serif;letter-spacing:1px;color:#c5f782}
+.t24-hub-game-text h3{font-size:clamp(26px,2.9vw,41px);line-height:1.1;margin:9px 0 14px;color:white;text-shadow:0 4px 16px #04140caf;font-weight:900;overflow-wrap:anywhere}
+.t24-hub-game-text p{display:flex;gap:7px;align-items:center;font-size:12px;color:#daeadc;margin:0}
+.t24-hub-game-date{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:125px;max-width:155px;background:#ffffff18;border:1px solid #ffffff32;border-radius:18px;padding:16px 14px;backdrop-filter:blur(10px);color:#ecf9db;text-align:center}
+.t24-hub-game-date>strong{font-size:14px}
+.t24-hub-game-date>span{font:900 20px 'DM Sans',sans-serif;color:#e1ffbb}
+.t24-hub-scoreboard{display:flex;align-items:center;justify-content:space-between;gap:15px;border-top:1px solid #ffffff36;border-bottom:1px solid #ffffff36;padding:14px 0}
+.t24-hub-team{display:flex;flex-direction:column;align-items:center;gap:7px;flex:1}
+.t24-hub-team>span{font:900 11px 'DM Sans',sans-serif;color:#d5f7bb;letter-spacing:1px}
+.t24-hub-team strong{font:900 27px 'DM Sans',sans-serif}
+.t24-hub-team strong i{font:700 15px 'DM Sans',sans-serif;color:#c4d6c5;font-style:normal}
+.t24-hub-versus{font:900 19px 'DM Sans',sans-serif;color:#c2ed71;border:1px solid #c2ed7155;padding:11px;border-radius:50%}
+.t24-hub-progress{padding:14px 0}
+.t24-hub-progress>div:first-child{display:flex;justify-content:space-between;font-size:11px;color:#d4eaca}
+.t24-hub-progress strong{font:800 12px 'DM Sans',sans-serif}
+.t24-hub-progress-track{height:7px;background:#ffffff36;overflow:hidden;border-radius:20px;margin-top:9px}
+.t24-hub-progress-track i{display:block;height:100%;background:linear-gradient(90deg,#9de25b,#d7ff8d);border-radius:20px;transition:width .35s}
+.t24-hub-main-button{z-index:1;position:relative;display:inline-flex;justify-content:center;align-items:center;gap:10px;background:#c1f378;border:1px solid #ecffbd;border-radius:13px;padding:13px 17px;font-size:13px;font-weight:900;color:#183721;box-shadow:0 10px 27px #0003;cursor:pointer;max-width:100%}
+.t24-hub-main-button:hover{background:#deff9d}
+.t24-hub-watermark{position:absolute;left:-28px;bottom:39px;opacity:.065;pointer-events:none;font:900 245px 'DM Sans',sans-serif;transform:rotate(-18deg)}
+.t24-hub-zero{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;max-width:380px;position:relative;z-index:1}
+.t24-hub-zero-icon{display:grid;place-items:center;width:73px;height:73px;border:1px solid #b9ed7d6c;border-radius:21px;background:#efffb91d;font-size:37px}
+.t24-hub-zero h3{font-size:clamp(26px,2.6vw,36px);line-height:1.25;margin:17px 0 7px;color:#fff}
+.t24-hub-zero p{font-size:12px;color:#d0e7d5;line-height:1.8}
+.t24-hub-actions{display:grid;grid-template-rows:repeat(3,minmax(0,1fr));gap:12px;min-width:0}
+.t24-action-card{min-width:0;width:100%;border:1px solid #d8e8d7;border-radius:18px;padding:15px;background:#fafff7;text-align:inherit;display:flex;align-items:center;gap:13px;box-shadow:0 9px 25px #112f1913;cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s}
+.t24-action-card:hover{transform:translateY(-3px);box-shadow:0 15px 29px #112f1924;border-color:#acd47e}
+.t24-action-create{background:linear-gradient(105deg,#ddffbb,#f7fff0);border-color:#bfe09a}
+.t24-action-players{background:linear-gradient(110deg,#f9fffc,#e7f4ff);border-color:#d3e2eb}
+.t24-action-matches{background:linear-gradient(110deg,#fffaf1,#ffefce);border-color:#ecdfc3}
+.t24-action-icon{height:58px;width:58px;flex-shrink:0;border-radius:17px;background:#bfef8e;display:grid;place-items:center;color:#23592b;box-shadow:inset 0 0 0 1px #ffffffa1}
+.t24-action-players .t24-action-icon{background:#d8ebff;color:#3474a7}
+.t24-action-matches .t24-action-icon{background:#ffe1a0;color:#95601c}
+.t24-action-copy{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0}
+.t24-action-copy small{font:900 9px 'DM Sans',sans-serif;letter-spacing:1px;color:#739477}
+.t24-action-copy strong{font-size:15px;line-height:1.3;color:#203d29;font-weight:900}
+.t24-action-copy>span{color:#748878;font-size:11px;line-height:1.5}
+.t24-action-arrow{flex-shrink:0;color:#789d6b}
+.t24-hub-bottomline{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:13px auto 0}
+.t24-hub-bottomline>span{display:flex;gap:7px;align-items:center;font-size:11px;font-weight:700;background:#ffffffaa;border:1px solid #e5eee1;border-radius:40px;padding:8px 11px;color:#617f62}
+.t24-hub-bottomline svg{color:#78ad4e}
+@media(max-width:1170px){.t24-hub-grid{grid-template-columns:1fr}.t24-hub-feature{min-height:390px}.t24-hub-actions{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:1fr}.t24-action-card{align-items:flex-start;flex-direction:column;position:relative;gap:10px}.t24-action-icon{height:49px;width:49px}.t24-action-arrow{position:absolute;right:15px;top:17px}.t24-action-copy strong{font-size:13px}}
+@media(max-width:640px){.t24-matchday-title{align-items:flex-start;gap:8px}.t24-matchday-title h2{font-size:23px}.t24-hub-grid{gap:10px}.t24-hub-feature{min-height:350px;padding:16px;border-radius:19px}.t24-hub-kicker{display:none}.t24-hub-game-hero{padding:15px 0;align-items:center}.t24-hub-game-text h3{font-size:26px}.t24-hub-game-date{padding:12px 8px;min-width:102px}.t24-hub-game-date strong{font-size:12px}.t24-hub-game-date>span{font-size:15px}.t24-hub-actions{display:grid;grid-template-columns:1fr;grid-template-rows:auto;gap:9px}.t24-action-card{flex-direction:row;align-items:center;gap:12px;padding:12px}.t24-action-copy strong{font-size:13px}.t24-action-icon{width:49px;height:49px}.t24-action-arrow{position:static}.t24-hub-bottomline{gap:6px}.t24-hub-bottomline>span{font-size:10px}.t24-hub-watermark{font-size:160px}.t24-hub-season{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.t24-action-card,.t24-hub-progress-track i{transition:none}}
