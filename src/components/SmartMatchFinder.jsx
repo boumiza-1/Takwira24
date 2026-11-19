@@ -18,7 +18,7 @@ const available=(match,lineup)=>{
  const current=lineup.filter(l=>l.match_id===match.id)
  const sides=['A',...(match.opponent_id?['B']:[])]
  return sides.flatMap(team=>Array.from({length:max},(_,i)=>({team,slot:i})))
-  .filter(s=>!current.some(l=>l.team===s.team&&Number(l.slot)===s.slot)))
+  .filter(s=>!current.some(l=>l.team===s.team&&Number(l.slot)===s.slot))
 }
 
 export default function SmartMatchFinder({matches=[],lineup=[],user,profile,lang='ar',onOpenMatch,onProfile}) {
