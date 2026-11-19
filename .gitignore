@@ -5,3 +5,10 @@ dist
 .DS_Store
 android
 ios
+
+# Never commit Google Play upload signing keys or credentials
+*.jks
+*.keystore
+*.p12
+*service-account*.json
+android-release-signing.properties
