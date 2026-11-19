@@ -1,5 +1,5 @@
-const CACHE_NAME = 'takwira24-shell-v2-brand'
-const APP_SHELL = ['./', './manifest.webmanifest', './takwira-icon.svg', './takwira24-logo.webp']
+const CACHE_NAME = 'takwira24-shell-v3-pwa-icons'
+const APP_SHELL = ['./', './manifest.webmanifest', './takwira-icon.svg', './takwira-icon-192.png', './takwira-icon-512.png', './takwira24-logo.webp']
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)))
   self.skipWaiting()
