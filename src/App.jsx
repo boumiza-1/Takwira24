@@ -9,6 +9,7 @@ import PlayerProfileModal from './components/PlayerProfileModal'
 import ShareMatchPanel from './components/ShareMatchPanel'
 import MatchResults from './components/MatchResults'
 import NotificationsPanel from './components/NotificationsPanel'
+import MatchdayHighlights from './components/MatchdayHighlights'
 import './app-mobile.css'
 
 const sports = {
@@ -491,6 +492,15 @@ export default function App() {
       {activeTab==='home' && <>
         <section className="welcome-row"><div><div className="eyebrow">TAKWIRA24 ⚽</div><h1>{t('الماتش الجاي،','Le prochain match')} <em>{t('يبدأ من هنا.','commence ici.')}</em></h1><p>{t('ماتشوات حقيقية، لاعبين مسجّلين، وتشكيلات تتبدّل لايف.','De vrais matchs, de vrais joueurs, des équipes et des formations en direct.')}</p></div><button className="primary-button" onClick={openMatch}><Plus size={20}/>{t('أنشئ ماتش','Créer un match')}</button></section>
         <section className="hero-card"><div className="hero-copy"><span className="hero-tag">TAKWIRA COMMUNITY</span><h2>{t('موش لازم تعرف 10 لاعبين.','Pas besoin de connaître 10 joueurs.')}<br/><em>{t('إحنا نلمّوهملك.','On réunit ton équipe.')}</em></h2><p>{t('اختار البلاصة والوقت، وبعد دعّي صحابك.','Choisis le terrain, la date et invite tes amis.')}</p><button onClick={openMatch}>{t('إبدأ كوّن فريقك','Composer mon équipe')} <ArrowLeft size={16}/></button></div><div className="hero-art t24-sport-cover"><div className="t24-cover-glow"/><img className="t24-hero-emblem" src={`${import.meta.env.BASE_URL}takwira24-logo.webp`} width="180" height="180" alt="" aria-hidden="true" /></div></section>
+        <MatchdayHighlights
+          game={matches.filter(m=>m.status==='open'||m.status==='full').sort((a,b)=>new Date(a.starts_at||'9999-12-31')-new Date(b.starts_at||'9999-12-31'))[0]||matches.find(m=>m.status==='postponed')||null}
+          lineup={lineup}
+          lang={lang}
+          onCreate={openMatch}
+          onPlayers={()=>setActiveTab('players')}
+          onMyMatches={()=>setActiveTab('matches')}
+          onOpenMatch={matchId=>{if(!user){setAuthOpen(true);return}setSelectedMatch(matchId);setActiveTab('matches')}}
+        />
         <div className="t24-sports-covers"><div className="t24-sport-tile t24-sport-foot" onClick={()=>setSport("football")} role="button" tabIndex={0} onKeyDown={e=>e.key==="Enter"&&setSport("football")}><span>⚽</span><div><strong>FOOTBALL</strong><small>{t('تيران gazon وتشكيلات حقيقية','Pelouse & formations réalistes')}</small></div></div><div className="t24-sport-tile t24-sport-hand" onClick={()=>setSport("handball")} role="button" tabIndex={0} onKeyDown={e=>e.key==="Enter"&&setSport("handball")}><span>🤾</span><div><strong>HANDBALL</strong><small>{t('ماتشات وأصحاب وتشكيلات','Matchs, équipes et passion')}</small></div></div></div>
         <div className="stats-grid">
           <div className="stat-card"><span className="stat-icon lime-bg"><Activity/></span><div><strong>{matches.length}</strong><small>{t('ماتش موجود','Matchs disponibles')}</small></div></div>
