@@ -1,14 +1,53 @@
-import { useEffect, useState } from 'react'
-import { Bell, Check, X, Users, Trophy, Clock3, CheckCheck } from 'lucide-react'
+import { useEffect, useState, useRef } from 'react'
+import { Bell, BellOff, Volume2, Check, X, Users, Trophy, Clock3, CheckCheck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 // Persistent private in-app inbox; notifications survive logouts and are refreshed live.
 export default function NotificationsPanel({ user, onOpenMatch, onAcceptInvite, onDecideRequest, onDecideChallenge, onRefresh,lang='ar' }) {
   const t=(ar,fr)=>lang==='fr'?fr:ar
   const [open,setOpen]=useState(false)
+  const [soundOn,setSoundOn]=useState(()=>{try{return localStorage.getItem('t24_sound')==='on'}catch{return false}})
+  const lastSound=useRef(0)
+  const audio=useRef(null)
   const [items,setItems]=useState([])
   const [busy,setBusy]=useState(false)
   const [error,setError]=useState('')
+  function playMatchChime(){
+    if(!soundOn||document.visibilityState!=='visible')return
+    if(Date.now()-lastSound.current<1600)return
+    lastSound.current=Date.now()
+    try{
+      const AudioContextCtor=window.AudioContext||window.webkitAudioContext
+      if(!AudioContextCtor)return
+      const context=audio.current||new AudioContextCtor()
+      audio.current=context
+      if(context.state==='suspended')context.resume().catch(()=>{})
+      // Short ORIGINAL match whistle-inspired sequence, not a third-party recording.
+      ;[784,988,1318].forEach((frequency,i)=>{
+        const t0=context.currentTime+0.08*i
+        const oscillator=context.createOscillator()
+        const gain=context.createGain()
+        oscillator.type='sine'
+        oscillator.frequency.setValueAtTime(frequency,t0)
+        gain.gain.setValueAtTime(.0001,t0)
+        gain.gain.exponentialRampToValueAtTime(.075,t0+.018)
+        gain.gain.exponentialRampToValueAtTime(.0001,t0+.16)
+        oscillator.connect(gain);gain.connect(context.destination)
+        oscillator.start(t0);oscillator.stop(t0+.17)
+      })
+    }catch{/* Unsupported audio or restricted mobile autoplay: bell remains functional. */}
+  }
+  function toggleSound(){
+    const enabled=!soundOn
+    setSoundOn(enabled)
+    try{localStorage.setItem('t24_sound',enabled?'on':'off')}catch{}
+    if(enabled){
+      try{const Ctor=window.AudioContext||window.webkitAudioContext
+        if(Ctor){audio.current=audio.current||new Ctor();audio.current.resume().catch(()=>{})}
+      }catch{}
+    }
+  }
+  useEffect(()=>()=>{audio.current?.close?.().catch?.(()=>{})},[])
   async function reload() {
     if(!user) return
     const { data,error:readError }=await supabase.from('t24_notifications').select('*')
@@ -20,7 +59,7 @@ export default function NotificationsPanel({ user, onOpenMatch, onAcceptInvite, 
     if(!user){setItems([]);setOpen(false);return}
     reload()
     const channel=supabase.channel('t24-inbox-'+user.id)
-      .on('postgres_changes',{event:'INSERT',schema:'public',table:'t24_notifications',filter:'user_id=eq.'+user.id},()=>{reload();onRefresh?.()})
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'t24_notifications',filter:'user_id=eq.'+user.id},()=>{reload();playMatchChime();onRefresh?.()})
       .subscribe()
     // Also recover notifications if a phone/browser was asleep while events were sent.
     const visibility=()=>{if(document.visibilityState==='visible'){reload();onRefresh?.()}}
@@ -52,6 +91,7 @@ export default function NotificationsPanel({ user, onOpenMatch, onAcceptInvite, 
     finally{setBusy(false)}
   }
   return <div className="t24-notification-root" dir={lang==='fr'?'ltr':'rtl'}>
+    <button type="button" className="t24-sound-toggle" onClick={toggleSound} title={soundOn?t('إيقاف صوت الماتش','Couper le son du match'):t('تفعيل صوت الماتش','Activer le son du match')} aria-label={soundOn?t('صوت الإشعارات مفعّل','Son activé'):t('تفعيل صوت الإشعارات','Activer le son des notifications')}>{soundOn?<Volume2 size={17}/>:<BellOff size={17}/>}</button>
     <button type="button" className="t24-notification-trigger" aria-label={t('الإشعارات','Notifications')} title={t('الإشعارات','Notifications')} onClick={()=>{setOpen(v=>!v);if(!open)reload()}}>
       <Bell size={20}/>{unread>0&&<span>{unread>99?'99+':unread}</span>}
     </button>
