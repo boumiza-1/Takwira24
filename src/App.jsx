@@ -8,6 +8,7 @@ import PlayerSearchModal from './components/PlayerSearchModal'
 import PlayerProfileModal from './components/PlayerProfileModal'
 import ShareMatchPanel from './components/ShareMatchPanel'
 import MatchResults from './components/MatchResults'
+import MatchCommunity from './components/MatchCommunity'
 import NotificationsPanel from './components/NotificationsPanel'
 import MatchdayHighlights from './components/MatchdayHighlights'
 import StadiumMobileHome, { CITIES } from './components/StadiumMobileHome'
@@ -607,6 +608,7 @@ export default function App() {
         </div>}
         <div className="t24-captain-self-pick">{user&&currentMatch.status==='open'&&(['A','B'].some(team=>canManageTeam(currentMatch,team)))&& !lineup.some(row=>row.match_id===currentMatch.id&&row.player_id===user.id)&&<div className="t24-captain-pick-controls"><label>{t('مركزي في التشكيلة','Mon poste sur le terrain')} <select value={captainSelfSlot} onChange={e=>setCaptainSelfSlot(Number(e.target.value))}>{Array.from({length:Number(currentMatch.outfield_per_team||6)+1+Number(currentMatch.bench_per_team||0)},(_,i)=><option key={i} value={i}>{i===0&&currentMatch.sport!=='basketball'?'Gardien':i<=Number(currentMatch.outfield_per_team||6)?(t('لاعب ','Joueur ')+(currentMatch.sport==='basketball'?i+1:i)):(t('بديل ','Remplaçant ')+(i-Number(currentMatch.outfield_per_team||6)))}</option>)}</select></label><button type="button" className="primary-button" disabled={busy} onClick={()=>addCaptainToField(currentMatch,canManageTeam(currentMatch,'A')?'A':'B',captainSelfSlot)}>⚽ {t('حطّ روحي في التشكيلة','Me placer dans la composition')}</button></div>}</div>
         <ShareMatchPanel match={currentMatch} lineup={lineup} lang={lang}/>
+        <MatchCommunity match={currentMatch} entries={participants} players={players} user={user} lang={lang} onPlayerOpen={setViewedPlayer}/>
         <MatchResults match={currentMatch} entries={participants} players={players} user={user} lang={lang} onChanged={()=>refreshData(user)}/>
         <FormationPitch lang={lang} outfield={currentMatch.outfield_per_team||6} bench={currentMatch.bench_per_team||0} sport={currentMatch.sport}
           entries={participants} players={players} busy={busy}
