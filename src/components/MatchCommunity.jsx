@@ -54,7 +54,7 @@ export default function MatchCommunity({ match, entries=[], players=[], user, la
   const fetchReports=useCallback(async()=>{
     if(!myId||!moderator||!matchId)return
     const {data,error:reportError}=await supabase.from('t24_match_message_reports')
-      .select('id,message_id,reason,created_at').is('resolved_at',null).order('created_at',{ascending:false}).limit(80)
+      .select('id,message_id,reason,created_at,t24_match_messages!inner(match_id)').eq('t24_match_messages.match_id',matchId).is('resolved_at',null).order('created_at',{ascending:false}).limit(80)
     if(!reportError)setReports(data||[])
   },[myId,moderator,matchId])
 
