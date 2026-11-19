@@ -15,7 +15,7 @@ const roleAllowed=(role,slot,match)=>{
  if(role==='bench')return slot>Number(match.outfield_per_team)
  return true
 }
-export default function AutoSubstitute({match,entries=[],user,lang='ar',onChanged,onOpenProfile}){
+export default function AutoSubstitute({match,entries=[],joinRequests=[],user,lang='ar',onChanged}){
  const t=(ar,fr)=>lang==='fr'?fr:ar
  const [waitlist,setWaitlist]=useState([])
  const [team,setTeam]=useState('A')
@@ -55,7 +55,8 @@ export default function AutoSubstitute({match,entries=[],user,lang='ar',onChange
   !entries.some(e=>e.match_id===match.id&&e.team===side&&Number(e.slot)===slot)
  )
  const free=empty(team).filter(slot=>roleAllowed(role,slot,match))
- const waitable=match.status==='open'&&!isCaptain&&!ownLineup&&!current
+ const hasRequest=joinRequests.some(q=>q.match_id===match.id&&q.player_id===user?.id)
+ const waitable=match.status==='open'&&!isCaptain&&!ownLineup&&!current&&!hasRequest
  const roleOptions=ROLES.filter(item=>!(item.value==='keeper'&&match.sport==='basketball'))
  const describeSlot=slot=>slot===null||slot===undefined?'—':(slot===0&&match.sport!=='basketball'?'Gardien':slot>Number(match.outfield_per_team)?'Banc '+(slot-Number(match.outfield_per_team)):'P'+(match.sport==='basketball'?slot+1:slot))
  async function addToWaitlist(){
@@ -120,6 +121,7 @@ export default function AutoSubstitute({match,entries=[],user,lang='ar',onChange
    {ownLineup&&match.status==='open'&&<div className="t24-auto-withdraw"><span><Check size={17}/>{t('إنت لاعب مؤكّد في التشكيلة','Tu es confirmé dans la composition')}</span>
      <button type="button" disabled={busy} onClick={withdraw}><UserRoundX size={16}/>{t('نعتذر / نحرّر بلاصتي','Je me désiste')}</button>
    </div>}
+   {hasRequest&&!current&&<p className="t24-auto-muted">{t('عندك طلب لعب سابق في الماتش هذا، استنّى جواب المسؤول.','Tu as déjà demandé à participer à ce match. Attends la réponse du capitaine.')}</p>}
    {current&&<div className={'t24-auto-status t24-auto-'+current.status}>
      <strong>{current.status==='waiting'?t('⏳ إنت في قائمة الانتظار','⏳ Tu es en liste d’attente'):
       current.status==='offered'?t('🎯 بلاصة تفرغت ليك!','🎯 Une place est disponible pour toi !'):
