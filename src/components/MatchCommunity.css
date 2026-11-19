@@ -1,0 +1,58 @@
+/* TAKWIRA24 • Locker Room comments and real-time team chat */
+.t24-community{margin:20px 0;padding:19px;border:1px solid #386a4a;border-radius:22px;background:linear-gradient(150deg,#102f24,#0a211b);box-shadow:0 17px 42px #041c1340;color:#e6f5e9}
+.t24-community-header{display:flex;justify-content:space-between;align-items:flex-start;gap:13px;flex-wrap:wrap;margin-bottom:14px}
+.t24-community-eyebrow{color:#c8f983;font:900 10px 'DM Sans',sans-serif;letter-spacing:1.2px}
+.t24-community-header h3{display:flex;align-items:center;gap:8px;color:white;font-size:21px;margin:7px 0}
+.t24-community-header h3 svg{color:#bcfc65}
+.t24-community-header p{font-size:12px;color:#b1cdb7;margin:0;line-height:1.65}
+.t24-community-connection{font-size:10px;font-weight:900;display:flex;align-items:center;gap:5px;color:#9fb4a8;background:#1b392e;border:1px solid #3e6652;border-radius:20px;padding:7px 10px}
+.t24-community-connection.online{color:#b6ff86;border-color:#87c45c70}
+.t24-community-tabs{display:flex;align-items:center;gap:7px;border-radius:12px;padding:5px;background:#071e17;border:1px solid #325340;margin-bottom:12px}
+.t24-community-tabs button{background:transparent;border:0;color:#aac2ab;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 13px;font-weight:900;font-size:12px;border-radius:9px}
+.t24-community-tabs button:not(.t24-community-reload){flex:1}
+.t24-community-tabs button.active{background:#c8f777;color:#17371c;box-shadow:0 3px 12px #08170c78}
+.t24-community-tabs b{font-size:10px;padding:3px 7px;border-radius:20px;background:#a2d47a3b}
+.t24-community-tabs button.active b{background:#578f3d29}
+.t24-community-live-dot{height:9px;width:9px;background:#b4fc58;border-radius:50%;box-shadow:0 0 0 4px #b4fc5833}
+.t24-community-tabs .t24-community-unseen{background:#fc554e;color:white}
+.t24-community-tabs button.t24-community-reload{flex:0;min-width:36px}
+.t24-community-feed{overflow-y:auto;overscroll-behavior:contain;min-height:160px;max-height:370px;border:1px solid #315a41;border-radius:14px;background:#092319;scrollbar-color:#447b53 #092319;padding:12px}
+.t24-community-feed.comments{max-height:440px}
+.t24-community-item{display:flex;align-items:flex-start;gap:10px;margin:0 0 12px;min-width:0}
+.t24-community-feed.chat .t24-community-item.mine{flex-direction:row-reverse}
+.t24-community-avatar{border:0;background:#c3ef86;border-radius:12px;overflow:hidden;display:grid;place-items:center;flex-shrink:0;width:38px;height:38px;color:#1f4c2d;font-size:14px;font-weight:900;padding:0}
+.t24-community-avatar img{width:100%;height:100%;object-fit:cover}
+.t24-community-item-main{min-width:0;flex:1;border:1px solid #365741;border-radius:13px;background:#143829;padding:11px 12px}
+.t24-community-feed.chat .t24-community-item-main{flex:initial;max-width:85%;min-width:min(140px,50%);border-radius:14px 14px 14px 4px}
+.t24-community-feed.chat .t24-community-item.mine .t24-community-item-main{background:#214d31;border-color:#54834e;border-radius:14px 14px 4px 14px}
+.t24-community-meta{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.t24-community-meta strong{color:#e5ffc9;font-size:12px;font-weight:900}
+.t24-community-meta small{color:#9ab4a0;font-size:10px;margin-inline-start:auto}
+.t24-community-you{border:1px solid #7dbb58;color:#b9f584;font-size:9px;border-radius:8px;padding:2px 5px}
+.t24-community-item p{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.7;margin:8px 0;color:#f4fff3}
+.t24-community-item.hidden{opacity:.55}
+.t24-community-item-actions{display:flex;gap:9px;flex-wrap:wrap}
+.t24-community-item-actions button{border:0;background:transparent;color:#b1c1b3;display:flex;align-items:center;gap:4px;padding:3px 0;font-size:10px;cursor:pointer}
+.t24-community-item-actions button:hover{color:#ecffcc}
+.t24-community-compose{margin-top:11px}
+.t24-community-compose>label{display:block;margin-bottom:7px;color:#d1e4cf;font-size:12px;font-weight:800}
+.t24-community-compose-row{display:flex;gap:7px;align-items:stretch}
+.t24-community-compose textarea,.t24-community-report textarea{flex:1;min-width:0;resize:vertical;border-radius:11px;padding:12px;border:1px solid #537858;background:#09251a;color:#f4fff0;font:inherit;font-size:13px}
+.t24-community-compose textarea::placeholder,.t24-community-report textarea::placeholder{color:#83a08a}
+.t24-community-compose-row button{border:1px solid #dfffac;background:#c7ff73;border-radius:11px;display:flex;align-items:center;justify-content:center;gap:7px;min-width:96px;padding:9px;color:#174423;font-size:12px;font-weight:900;cursor:pointer}
+.t24-community-compose-row button:disabled{opacity:.4;cursor:not-allowed}
+.t24-community-compose>small{display:block;margin-top:6px;font-size:10px;color:#8db79a}
+.t24-community-empty,.t24-community-locked{min-height:160px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:9px;text-align:center;color:#bfe5c2;padding:15px}
+.t24-community-empty svg,.t24-community-locked svg{color:#c9fa7a}
+.t24-community-empty strong,.t24-community-locked strong{font-size:13px;color:#e8ffdf}
+.t24-community-empty small,.t24-community-locked p{font-size:11px;color:#9fbea9}
+.t24-community-readonly{display:flex;align-items:center;gap:8px;margin-top:11px;padding:13px;border:1px solid #376147;border-radius:11px;color:#b7cfb8;font-size:12px}
+.t24-community-report,.t24-community-mod{margin-top:12px;border:1px solid #607a4d;border-radius:12px;padding:13px;background:#193529}
+.t24-community-report>div{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.t24-community-report strong,.t24-community-mod h4{display:flex;align-items:center;gap:6px;color:#f4fff1;font-size:13px;margin:0}
+.t24-community-report>div>button{background:transparent;border:0;color:white}
+.t24-community-report textarea{width:100%;height:83px}
+.t24-community-report>button,.t24-community-report-row button{margin-top:9px;background:#deff9b;color:#244522;border:0;border-radius:8px;padding:8px 12px;font-size:11px;font-weight:900}
+.t24-community-report-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-top:1px solid #517054;color:#fff;font-size:12px}
+.t24-community-feedback{margin:10px 0 0}
+@media(max-width:620px){.t24-community{padding:12px;border-radius:15px;margin:13px 0}.t24-community-header h3{font-size:17px}.t24-community-tabs button{padding:10px 6px;font-size:10px;gap:4px}.t24-community-tabs svg{width:15px}.t24-community-feed{padding:8px;max-height:330px}.t24-community-item-main{padding:9px}.t24-community-avatar{height:33px;width:33px}.t24-community-compose-row button{min-width:67px;flex-direction:column;gap:3px}.t24-community-compose-row button span{font-size:10px}}
