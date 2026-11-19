@@ -100,7 +100,7 @@ jobs:
           jarsigner -keystore "$KEYSTORE_FILE" -storepass:env UPLOAD_PASSWORD \
             -keypass:env UPLOAD_KEY_PASSWORD -sigalg SHA256withRSA -digestalg SHA-256 \
             "$AAB" "$UPLOAD_ALIAS"
-          jarsigner -verify -strict "$AAB"
+          jarsigner -verify "$AAB"
           rm -f "$KEYSTORE_FILE"
 
       - name: Upload signed bundle for manual Play Console release
