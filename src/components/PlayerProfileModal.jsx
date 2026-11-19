@@ -38,7 +38,7 @@ export default function PlayerProfileModal({player,onClose,lang='ar'}){
         <div className="t24-public-avatar">{player.avatar_url?<img src={player.avatar_url} alt={'Photo '+player.display_name} loading="lazy"/>:<UserRound size={48}/>}</div>
         <div><small className="eyebrow">OFFICIAL PLAYER PROFILE</small><h2>{player.display_name}</h2>
           <span className="t24-public-id" dir="ltr">{player.public_id}</span>
-          <p><MapPin size={15}/>{player.city||t('تونس','Tunisie')} <span>•</span> {player.position||t('لاعب','Joueur')} <span>•</span> {player.sport==='handball'?'Handball':'Football'}</p>
+          <p><MapPin size={15}/>{player.city||t('تونس','Tunisie')} <span>•</span> {player.position||t('لاعب','Joueur')} <span>•</span> {(player.sports?.length?player.sports:[player.sport]).map(id=>({football:'⚽ Football',handball:'🤾 Handball',basketball:'🏀 Basketball',volleyball:'🏐 Volley-ball'}[id]||id)).join(' • ')}</p>
         </div>
       </div>
       <div className="t24-public-rating-hero">
