@@ -7,9 +7,9 @@ export default function JoinPositionModal({match,team,entries=[],lang='ar',busy=
  const total=n+Number(match.bench_per_team||0)
  const options=useMemo(()=>Array.from({length:total},(_,i)=>({
     slot:i,
-    role:i===0?'🧤 '+t('حارس','Gardien'):i<n?'⚽ '+t('لاعب','Joueur')+' '+i:'🪑 '+t('بديل','Remplaçant')+' '+(i-n+1),
+    role:match.sport==='basketball'&&i<n?'🏀 '+t('لاعب','Joueur')+' '+(i+1):i===0?'🧤 '+t('حارس','Gardien'):i<n?'⚽ '+t('لاعب','Joueur')+' '+i:'🪑 '+t('بديل','Remplaçant')+' '+(i-n+1),
     occupied:entries.some(e=>e.match_id===match.id&&e.team===team&&Number(e.slot)===i)
- })),[entries,match.id,team,total,n,lang])
+ })),[entries,match.id,match.sport,team,total,n,lang])
  const [picked,setPicked]=useState(null)
  const available=options.filter(x=>!x.occupied)
  return <div className="s24-join-backdrop" onMouseDown={e=>e.target===e.currentTarget&&onClose()}>
