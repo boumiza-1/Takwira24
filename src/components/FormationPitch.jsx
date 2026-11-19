@@ -7,6 +7,7 @@ import './FormationPitch.css'
 // Each team has its own mirrored half of the full stadium.
 function teamFormation(outfield) {
   const patterns = {
+    4: [[50,85],[25,66],[75,66],[27,35],[73,35]],
     6: [[50,88],[20,67],[50,67],[80,67],[32,40],[68,40],[50,16]],
     7: [[50,88],[20,67],[50,67],[80,67],[18,40],[50,40],[82,40],[50,16]],
     8: [[50,88],[20,67],[50,67],[80,67],[18,43],[50,43],[82,43],[34,16],[66,16]]
@@ -22,6 +23,7 @@ export default function FormationPitch({
   const startCount = Number(outfield) + 1
   const benchCount = Number(bench)
   const coords = useMemo(() => teamFormation(Number(outfield)), [outfield])
+  const isBasket=sport==='basketball'
   const lookup = id => players.find(p=>p.id===id)
   const lookupEntry = (team,slot) => entries.find(e=>e.team===team && e.slot===slot)
   return <div className="tf-shell" dir="rtl">
@@ -44,16 +46,16 @@ export default function FormationPitch({
             const state=row?.status || 'empty'
             const occupied=Boolean(row)
             return <button key={team+'-'+slot} type="button"
-              className={'tf-slot '+(occupied?'tf-slot-occupied ':'')+(team==='B'?'tf-slot-blue':'')+(slot===0?' tf-keeper':'')+' tf-state-'+state}
+              className={'tf-slot '+(occupied?'tf-slot-occupied ':'')+(team==='B'?'tf-slot-blue':'')+(slot===0&&!isBasket?' tf-keeper':'')+' tf-state-'+state}
               style={{left:x+'%',top:flippedY+'%'}}
-              title={occupied?(person?.display_name||t('لاعب','Joueur'))+' — '+(state==='invited'?t('في انتظار الموافقة','En attente'):state==='declined'?t('رفض الدعوة','Refusé'):t('مؤكّد','Confirmé')):t('مكان فارغ — ','Place libre — ')+(slot===0?'Gardien':'Joueur')}
+              title={occupied?(person?.display_name||t('لاعب','Joueur'))+' — '+(state==='invited'?t('في انتظار الموافقة','En attente'):state==='declined'?t('رفض الدعوة','Refusé'):t('مؤكّد','Confirmé')):t('مكان فارغ — ','Place libre — ')+(slot===0&&!isBasket?'Gardien':'Joueur')}
               disabled={busy || !canEdit}
               onClick={()=>onSelectSlot?.(team,slot,row)}
             >
               <span className="tf-player-circle">{person?.avatar_url?
                 <img src={person.avatar_url} alt={person.display_name||'لاعب'} loading="lazy"/>:
                 occupied?<Shirt size={18} strokeWidth={2}/>:<span className="tf-empty-plus">+</span>}</span>
-              <span className="tf-player-name">{occupied?(person?.display_name||'لاعب'):slot===0?'Gardien':('P'+slot)}</span>{state==='invited'&&<span className="tf-state-label">⏳ انتظار</span>}{state==='declined'&&<span className="tf-state-label">✕ رفض</span>}
+              <span className="tf-player-name">{occupied?(person?.display_name||t('لاعب','Joueur')):slot===0&&!isBasket?'Gardien':('P'+(isBasket?slot+1:slot))}</span>{state==='invited'&&<span className="tf-state-label">⏳ انتظار</span>}{state==='declined'&&<span className="tf-state-label">✕ رفض</span>}
             </button>
           })}
         </div>)}
@@ -73,6 +75,6 @@ export default function FormationPitch({
         })}</div>}
       </div>)}
     </div>
-    <div className="tf-summary"><span>🧤 {t('حارس + ','Gardien + ')}{outfield} {t('لاعبين لكل فريق','joueurs par équipe')}</span><span>🪑 {benchCount} {t('بدلاء لكل فريق','remplaçants par équipe')}</span><span>👥 {2*(startCount+benchCount)} {t('بلاصة في الماتش','places au total')}</span></div>
+    <div className="tf-summary"><span>{isBasket?'🏀 '+(Number(outfield)+1)+' '+t('لاعبين لكل فريق','joueurs par équipe'):'🧤 '+t('حارس + ','Gardien + ')+outfield+' '+t('لاعبين لكل فريق','joueurs par équipe')}</span><span>🪑 {benchCount} {t('بدلاء لكل فريق','remplaçants par équipe')}</span><span>👥 {2*(startCount+benchCount)} {t('بلاصة في الماتش','places au total')}</span></div>
   </div>
 }
