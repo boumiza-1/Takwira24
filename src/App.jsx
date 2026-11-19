@@ -12,6 +12,8 @@ import MatchCommunity from './components/MatchCommunity'
 import NotificationsPanel from './components/NotificationsPanel'
 import MatchdayHighlights from './components/MatchdayHighlights'
 import StadiumMobileHome, { CITIES } from './components/StadiumMobileHome'
+import SmartMatchFinder from './components/SmartMatchFinder'
+import AutoSubstitute from './components/AutoSubstitute'
 import JoinPositionModal from './components/JoinPositionModal'
 import './app-mobile.css'
 import './premium-redesign.css'
@@ -206,6 +208,7 @@ export default function App() {
         id: user.id, display_name: (draft.display_name || '').trim() || 'لاعب',
         city: draft.city || '', sport: draft.sport || 'football',
         position: draft.position || '', bio: draft.bio || '',
+        skill_level: draft.skill_level || 'مفتوح',
         sports:Array.from(new Set([...(draft.sports||[draft.sport||'football']),draft.sport||'football'])).filter(id=>sports[id]),
         avatar_url: profile?.avatar_url || null, updated_at: new Date().toISOString()
       }
@@ -513,6 +516,9 @@ export default function App() {
         onGoProfile={()=>setActiveTab('profile')}
         onOpenMatch={id=>{setSelectedMatch(id);setActiveTab('matches')}}
       />}
+      {activeTab==='home' && <SmartMatchFinder matches={matches} lineup={lineup} user={user} profile={profile} lang={lang}
+        onOpenMatch={id=>{setSelectedMatch(id);setActiveTab('matches')}}
+        onProfile={()=>setActiveTab('profile')}/>}
 
       {activeTab==='matches' && <>
         <div id="t24-find-games" className="section-heading"><div><span className="eyebrow">FIND YOUR GAME</span><h2>{activeTab==='matches'?t('ماتشاتي ودعواتي','Mes matchs et invitations'):t('ماتشات تستنّى فيك','Matchs disponibles')}</h2></div>{user&&<button className="outline-button" onClick={()=>refreshData(user)}><RefreshCw size={15}/>{t('تحديث','Actualiser')}</button>}</div>
@@ -565,7 +571,8 @@ export default function App() {
       </form>
     </div>}
 
-    {editProfileOpen&&<div className="modal-backdrop" onMouseDown={e=>e.target===e.currentTarget&&setEditProfileOpen(false)}><form className="create-modal profile-editor" onSubmit={saveProfile}><div className="modal-head"><div><span className="eyebrow">PLAYER PROFILE</span><h2>{t('بطاقة اللاعب','Carte du joueur')}</h2></div><button type="button" className="icon-button" onClick={()=>setEditProfileOpen(false)}><X/></button></div><div className="t24-avatar-upload"><Avatar name={draft.display_name} url={profile?.avatar_url}/><small>{t('تنجم تبدّل تصويرتك من قسم التصاور، وتظهر مباشرة.','Change ta photo de profil depuis Photos : publication immédiate.')}</small></div><label className="field-label">{t('الإسم','Nom')}<input required value={draft.display_name||''} onChange={e=>setDraft({...draft,display_name:e.target.value})}/></label><div className="form-two"><label className="field-label">{t('المدينة','Ville')}<input value={draft.city||''} onChange={e=>setDraft({...draft,city:e.target.value})}/></label><label className="field-label">{t('المركز','Poste')}<input value={draft.position||''} onChange={e=>setDraft({...draft,position:e.target.value})}/></label></div><label className="field-label">{t('الرياضة الأساسية','Sport principal')}<select value={draft.sport||'football'} onChange={e=>setDraft({...draft,sport:e.target.value,sports:Array.from(new Set([...(draft.sports||[draft.sport||'football']),e.target.value]))})}>{Object.entries(sports).map(([id,z])=><option key={id} value={id}>{sportLabel(id)}</option>)}</select></label><fieldset className="s24-multi-sports"><legend>{t('رياضاتي: اختار أكثر من رياضة','Mes sports : choix multiple')}</legend>{Object.keys(sports).map(id=><label key={id}><input type="checkbox" checked={(draft.sports||[draft.sport||'football']).includes(id)} onChange={e=>setDraft({...draft,sports:e.target.checked?Array.from(new Set([...(draft.sports||[draft.sport||'football']),id])):(draft.sports||[]).filter(s=>s!==id)})}/>{sports[id].icon} {sportLabel(id)}</label>)}</fieldset><label className="field-label">{t('نبذة عليك','Biographie')}<textarea rows="3" value={draft.bio||''} onChange={e=>setDraft({...draft,bio:e.target.value})}/></label><button className="primary-button submit-match" disabled={busy}><CheckCircle2 size={18}/>{t('حفظ الملف','Enregistrer')}</button></form></div>}
+    {editProfileOpen&&<div className="modal-backdrop" onMouseDown={e=>e.target===e.currentTarget&&setEditProfileOpen(false)}><form className="create-modal profile-editor" onSubmit={saveProfile}><div className="modal-head"><div><span className="eyebrow">PLAYER PROFILE</span><h2>{t('بطاقة اللاعب','Carte du joueur')}</h2></div><button type="button" className="icon-button" onClick={()=>setEditProfileOpen(false)}><X/></button></div><div className="t24-avatar-upload"><Avatar name={draft.display_name} url={profile?.avatar_url}/><small>{t('تنجم تبدّل تصويرتك من قسم التصاور، وتظهر مباشرة.','Change ta photo de profil depuis Photos : publication immédiate.')}</small></div><label className="field-label">{t('الإسم','Nom')}<input required value={draft.display_name||''} onChange={e=>setDraft({...draft,display_name:e.target.value})}/></label><div className="form-two"><label className="field-label">{t('المدينة','Ville')}<input value={draft.city||''} onChange={e=>setDraft({...draft,city:e.target.value})}/></label><label className="field-label">{t('المركز','Poste')}<input value={draft.position||''} onChange={e=>setDraft({...draft,position:e.target.value})}/></label>
+        <label className="field-label">{t('مستواك الرياضي','Ton niveau sportif')}<select value={draft.skill_level||'مفتوح'} onChange={e=>setDraft({...draft,skill_level:e.target.value})}>{[['مفتوح','Ouvert'],['مبتدئ','Débutant'],['متوسط','Intermédiaire'],['متقدم','Avancé']].map(([id,fr])=><option key={id} value={id}>{lang==='fr'?fr:id}</option>)}</select></label></div><label className="field-label">{t('الرياضة الأساسية','Sport principal')}<select value={draft.sport||'football'} onChange={e=>setDraft({...draft,sport:e.target.value,sports:Array.from(new Set([...(draft.sports||[draft.sport||'football']),e.target.value]))})}>{Object.entries(sports).map(([id,z])=><option key={id} value={id}>{sportLabel(id)}</option>)}</select></label><fieldset className="s24-multi-sports"><legend>{t('رياضاتي: اختار أكثر من رياضة','Mes sports : choix multiple')}</legend>{Object.keys(sports).map(id=><label key={id}><input type="checkbox" checked={(draft.sports||[draft.sport||'football']).includes(id)} onChange={e=>setDraft({...draft,sports:e.target.checked?Array.from(new Set([...(draft.sports||[draft.sport||'football']),id])):(draft.sports||[]).filter(s=>s!==id)})}/>{sports[id].icon} {sportLabel(id)}</label>)}</fieldset><label className="field-label">{t('نبذة عليك','Biographie')}<textarea rows="3" value={draft.bio||''} onChange={e=>setDraft({...draft,bio:e.target.value})}/></label><button className="primary-button submit-match" disabled={busy}><CheckCircle2 size={18}/>{t('حفظ الملف','Enregistrer')}</button></form></div>}
 
     {currentMatch&&<div className="modal-backdrop" onMouseDown={e=>e.target===e.currentTarget&&setSelectedMatch(null)}>
       <div className="create-modal t24-lineup-modal">
@@ -608,6 +615,7 @@ export default function App() {
         </div>}
         <div className="t24-captain-self-pick">{user&&currentMatch.status==='open'&&(['A','B'].some(team=>canManageTeam(currentMatch,team)))&& !lineup.some(row=>row.match_id===currentMatch.id&&row.player_id===user.id)&&<div className="t24-captain-pick-controls"><label>{t('مركزي في التشكيلة','Mon poste sur le terrain')} <select value={captainSelfSlot} onChange={e=>setCaptainSelfSlot(Number(e.target.value))}>{Array.from({length:Number(currentMatch.outfield_per_team||6)+1+Number(currentMatch.bench_per_team||0)},(_,i)=><option key={i} value={i}>{i===0&&currentMatch.sport!=='basketball'?'Gardien':i<=Number(currentMatch.outfield_per_team||6)?(t('لاعب ','Joueur ')+(currentMatch.sport==='basketball'?i+1:i)):(t('بديل ','Remplaçant ')+(i-Number(currentMatch.outfield_per_team||6)))}</option>)}</select></label><button type="button" className="primary-button" disabled={busy} onClick={()=>addCaptainToField(currentMatch,canManageTeam(currentMatch,'A')?'A':'B',captainSelfSlot)}>⚽ {t('حطّ روحي في التشكيلة','Me placer dans la composition')}</button></div>}</div>
         <ShareMatchPanel match={currentMatch} lineup={lineup} lang={lang}/>
+        <AutoSubstitute key={currentMatch.id} match={currentMatch} entries={participants} user={user} lang={lang} onChanged={()=>refreshData(user)}/>
         <MatchCommunity match={currentMatch} entries={participants} players={players} user={user} lang={lang} onPlayerOpen={setViewedPlayer}/>
         <MatchResults match={currentMatch} entries={participants} players={players} user={user} lang={lang} onChanged={()=>refreshData(user)}/>
         <FormationPitch lang={lang} outfield={currentMatch.outfield_per_team||6} bench={currentMatch.bench_per_team||0} sport={currentMatch.sport}
