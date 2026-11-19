@@ -10,6 +10,7 @@ import ShareMatchPanel from './components/ShareMatchPanel'
 import MatchResults from './components/MatchResults'
 import NotificationsPanel from './components/NotificationsPanel'
 import MatchdayHighlights from './components/MatchdayHighlights'
+import StadiumMobileHome, { CITIES } from './components/StadiumMobileHome'
 import './app-mobile.css'
 import './premium-redesign.css'
 
@@ -50,6 +51,7 @@ export default function App() {
   const [viewedPlayer,setViewedPlayer] = useState(null)
   const [activeTab, setActiveTab] = useState('home')
   const [sport, setSport] = useState('all')
+  const [homeCity,setHomeCity] = useState('all')
   const [query, setQuery] = useState('')
   const [newMatchOpen, setNewMatchOpen] = useState(false)
   const [editProfileOpen, setEditProfileOpen] = useState(false)
@@ -490,30 +492,17 @@ export default function App() {
       {!isSupabaseConfigured && <div className="t24-warning">{t('قاعدة البيانات موش مهيّأة في نسخة النشر. يلزم إضافة إعدادات Supabase.','Supabase n’est pas configuré dans cette version.')}</div>}
       {error && <div className="t24-warning">{error} <button onClick={()=>user&&refreshData(user)}><RefreshCw size={15}/>{t('إعادة المحاولة','Réessayer')}</button></div>}
 
-      {activeTab==='home' && <>
-        <section className="welcome-row"><div><div className="eyebrow">TAKWIRA24 ⚽</div><h1>{t('الماتش الجاي،','Le prochain match')} <em>{t('يبدأ من هنا.','commence ici.')}</em></h1><p>{t('ماتشوات حقيقية، لاعبين مسجّلين، وتشكيلات تتبدّل لايف.','De vrais matchs, de vrais joueurs, des équipes et des formations en direct.')}</p></div><button className="primary-button" onClick={openMatch}><Plus size={20}/>{t('أنشئ ماتش','Créer un match')}</button></section>
-        <section className="hero-card"><div className="hero-copy"><span className="hero-tag">TAKWIRA COMMUNITY</span><h2>{t('موش لازم تعرف 10 لاعبين.','Pas besoin de connaître 10 joueurs.')}<br/><em>{t('إحنا نلمّوهملك.','On réunit ton équipe.')}</em></h2><p>{t('اختار البلاصة والوقت، وبعد دعّي صحابك.','Choisis le terrain, la date et invite tes amis.')}</p><button onClick={openMatch}>{t('إبدأ كوّن فريقك','Composer mon équipe')} <ArrowLeft size={16}/></button></div><div className="hero-art t24-sport-cover"><div className="t24-cover-glow"/><img className="t24-hero-emblem" src={`${import.meta.env.BASE_URL}takwira24-logo.webp`} width="180" height="180" alt="" aria-hidden="true" /></div></section>
-        <MatchdayHighlights
-          game={matches.filter(m=>m.status==='open'||m.status==='full').sort((a,b)=>new Date(a.starts_at||'9999-12-31')-new Date(b.starts_at||'9999-12-31'))[0]||matches.find(m=>m.status==='postponed')||null}
-          lineup={lineup}
-          lang={lang}
-          onCreate={openMatch}
-          onPlayers={()=>setActiveTab('players')}
-          onMyMatches={()=>setActiveTab('matches')}
-          onOpenMatch={matchId=>{if(!user){setAuthOpen(true);return}setSelectedMatch(matchId);setActiveTab('matches')}}
-        />
-        <div className="t24-sports-covers">
-          <button type="button" className="t24-sport-tile t24-sport-foot" aria-label={t('عرض ماتشات كرة القدم','Afficher les matchs de football')} onClick={()=>{setSport('football');document.getElementById('t24-find-games')?.scrollIntoView({behavior:'smooth',block:'start'})}}><span>⚽</span><div><strong>FOOTBALL</strong><small>{t('تيران gazon وتشكيلات حقيقية','Pelouse & formations réalistes')}</small></div></button>
-          <button type="button" className="t24-sport-tile t24-sport-hand" aria-label={t('عرض ماتشات كرة اليد','Afficher les matchs de handball')} onClick={()=>{setSport('handball');document.getElementById('t24-find-games')?.scrollIntoView({behavior:'smooth',block:'start'})}}><span>🤾</span><div><strong>HANDBALL</strong><small>{t('ماتشات وأصحاب وتشكيلات','Matchs, équipes et passion')}</small></div></button>
-        </div>
-        <div className="stats-grid">
-          <div className="stat-card"><span className="stat-icon lime-bg"><Activity/></span><div><strong>{matches.length}</strong><small>{t('ماتش موجود','Matchs disponibles')}</small></div></div>
-          <div className="stat-card"><span className="stat-icon blue-bg"><Users/></span><div><strong>{players.length}</strong><small>{t('لاعب مسجّل','Joueurs inscrits')}</small></div></div>
-          <div className="stat-card"><span className="stat-icon orange-bg"><Trophy/></span><div><strong>{lineup.filter(l=>l.status==='confirmed').length}</strong><small>{t('مشاركات مؤكّدة','Participations confirmées')}</small></div></div>
-        </div>
-      </>}
+      {activeTab==='home' && <StadiumMobileHome
+        matches={matches} players={players} lineup={lineup} user={user} lang={lang}
+        city={homeCity} setCity={setHomeCity}
+        onCreate={openMatch}
+        onGoPlayers={()=>setActiveTab('players')}
+        onGoMatches={()=>setActiveTab('matches')}
+        onGoProfile={()=>setActiveTab('profile')}
+        onOpenMatch={id=>{setSelectedMatch(id);setActiveTab('matches')}}
+      />}
 
-      {(activeTab==='home'||activeTab==='matches') && <>
+      {activeTab==='matches' && <>
         <div id="t24-find-games" className="section-heading"><div><span className="eyebrow">FIND YOUR GAME</span><h2>{activeTab==='matches'?t('ماتشاتي ودعواتي','Mes matchs et invitations'):t('ماتشات تستنّى فيك','Matchs disponibles')}</h2></div>{user&&<button className="outline-button" onClick={()=>refreshData(user)}><RefreshCw size={15}/>{t('تحديث','Actualiser')}</button>}</div>
         <div className="filters-row"><div className="sport-filters"><button className={'sport-filter '+(sport==='all'?'chosen':'')} onClick={()=>setSport('all')} >{t('الكل','Tous')}</button>{Object.entries(sports).map(([id,s])=><button key={id} className={'sport-filter '+(sport===id?'chosen':'')} onClick={()=>setSport(id)}>{s.icon} {lang==='fr'?sportLabel(id):s.label}</button>)}</div><label className="search-box"><Search size={17}/><input placeholder={t('قلّب على ماتش أو مدينة...','Chercher un match ou une ville...')} value={query} onChange={e=>setQuery(e.target.value)}/></label></div>
         {activeTab==='matches'&&ownInvitations.length>0&&<div className="t24-invites">{ownInvitations.map(entry=><div className="t24-invite" key={entry.id}><span>📩 {t('دعوة للماتش:','Invitation au match :')} {matches.find(m=>m.id===entry.match_id)?.title || t('ماتش','Match')}</span><button onClick={()=>respondInvite(entry,true)} disabled={busy}>{t('قبول','Accepter')}</button><button onClick={()=>respondInvite(entry,false)} disabled={busy}>{t('رفض','Refuser')}</button></div>)}</div>}
