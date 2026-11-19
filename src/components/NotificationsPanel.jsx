@@ -66,7 +66,7 @@ export default function NotificationsPanel({ user, onOpenMatch, onAcceptInvite, 
     document.addEventListener('visibilitychange',visibility)
     const interval=setInterval(()=>{if(document.visibilityState==='visible')reload()},25000)
     return()=>{supabase.removeChannel(channel);document.removeEventListener('visibilitychange',visibility);clearInterval(interval)}
-  },[user?.id])
+  },[user?.id,soundOn])
   if(!user)return null
   const unread=items.filter(n=>!n.read_at).length
   const markRead=async notification=>{
