@@ -1,0 +1,145 @@
+name: Takwira24 — Signed Google Play AAB
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_code:
+        description: 'New integer Android versionCode (must exceed any previously uploaded version)'
+        required: true
+        type: string
+      version_name:
+        description: 'Public versionName, for example 1.0.0'
+        required: true
+        default: '1.0.0'
+        type: string
+      release_action:
+        description: 'Build signed AAB only, or manually upload to Google Play internal testing'
+        required: true
+        default: 'build_only'
+        type: choice
+        options:
+          - build_only
+          - internal_testing
+
+permissions:
+  contents: read
+
+concurrency:
+  group: takwira-play-release
+  cancel-in-progress: false
+
+jobs:
+  signed-aab:
+    name: Sign Android App Bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Check required signing secrets
+        env:
+          UPLOAD_KEYSTORE: ${{ secrets.T24_UPLOAD_KEYSTORE_BASE64 }}
+          UPLOAD_PASSWORD: ${{ secrets.T24_UPLOAD_STORE_PASSWORD }}
+          UPLOAD_ALIAS: ${{ secrets.T24_UPLOAD_KEY_ALIAS }}
+          UPLOAD_KEY_PASSWORD: ${{ secrets.T24_UPLOAD_KEY_PASSWORD }}
+        run: |
+          if [[ -z "$UPLOAD_KEYSTORE" || -z "$UPLOAD_PASSWORD" || -z "$UPLOAD_ALIAS" || -z "$UPLOAD_KEY_PASSWORD" ]]; then
+            echo "::error::Missing signing secrets. Follow docs/GOOGLE_PLAY_RELEASE.md before running this workflow."
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web assets
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: https://ixadxgywnvlsjqscbntd.supabase.co
+          VITE_SUPABASE_ANON_KEY: sb_publishable_48Rd0dPSNde0hvkepsv28w_cfEClqZY
+
+      - name: Generate native Android application
+        run: |
+          npx cap add android
+          npx cap sync android
+
+      - name: Set versionCode and versionName
+        env:
+          VERSION_CODE: ${{ inputs.version_code }}
+          VERSION_NAME: ${{ inputs.version_name }}
+        run: python3 scripts/set_android_version.py android/app/build.gradle
+
+      - name: Build Android App Bundle
+        working-directory: android
+        run: chmod +x gradlew && ./gradlew bundleRelease --no-daemon
+
+      - name: Sign the AAB with the private upload key
+        env:
+          UPLOAD_KEYSTORE: ${{ secrets.T24_UPLOAD_KEYSTORE_BASE64 }}
+          UPLOAD_PASSWORD: ${{ secrets.T24_UPLOAD_STORE_PASSWORD }}
+          UPLOAD_ALIAS: ${{ secrets.T24_UPLOAD_KEY_ALIAS }}
+          UPLOAD_KEY_PASSWORD: ${{ secrets.T24_UPLOAD_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          KEYSTORE_FILE="$RUNNER_TEMP/takwira24-upload.jks"
+          printf '%s' "$UPLOAD_KEYSTORE" | base64 --decode > "$KEYSTORE_FILE"
+          chmod 600 "$KEYSTORE_FILE"
+          AAB="android/app/build/outputs/bundle/release/app-release.aab"
+          test -s "$AAB"
+          jarsigner -keystore "$KEYSTORE_FILE" -storepass:env UPLOAD_PASSWORD \
+            -keypass:env UPLOAD_KEY_PASSWORD -sigalg SHA256withRSA -digestalg SHA-256 \
+            "$AAB" "$UPLOAD_ALIAS"
+          jarsigner -verify -strict "$AAB"
+          rm -f "$KEYSTORE_FILE"
+
+      - name: Upload signed bundle for manual Play Console release
+        uses: actions/upload-artifact@v4
+        with:
+          name: Takwira24-Google-Play-AAB-v${{ inputs.version_code }}
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 30
+
+  internal-testing:
+    name: Upload to Google Play internal testing (manual action only)
+    needs: signed-aab
+    if: ${{ inputs.release_action == 'internal_testing' }}
+    runs-on: ubuntu-latest
+    environment: google-play-upload
+    permissions:
+      contents: read
+    steps:
+      - name: Ensure Play API credential exists
+        env:
+          PLAY_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [[ -z "$PLAY_JSON" ]]; then
+            echo "::error::Missing GOOGLE_PLAY_SERVICE_ACCOUNT_JSON in GitHub Secrets."
+            exit 1
+          fi
+
+      - name: Download signed AAB
+        uses: actions/download-artifact@v4
+        with:
+          name: Takwira24-Google-Play-AAB-v${{ inputs.version_code }}
+          path: play-bundle
+
+      - name: Upload to internal testing track
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.princo.takwira24
+          releaseFiles: play-bundle/app-release.aab
+          track: internal
+          status: completed
