@@ -1,0 +1,140 @@
+/* TAKWIRA24 • Stadium Edition — responsive app-first layout */
+.s24-dashboard{--s24-lime:#ccff3e;--s24-ink:#f3fff1;--s24-muted:#9cb7a4;--s24-border:#37714c;direction:inherit;color:var(--s24-ink);padding:3px 0 80px;max-width:1440px;margin:0 auto}
+.s24-dashboard *{box-sizing:border-box}
+.s24-dashboard button,.s24-dashboard select,.s24-dashboard input{font:inherit}
+.s24-dashboard button{cursor:pointer}
+.s24-dashboard button:focus-visible,.s24-dashboard select:focus-visible,.s24-dashboard input:focus-visible{outline:2px solid #d0ff55;outline-offset:3px}
+.s24-hero{position:relative;min-height:332px;overflow:hidden;isolation:isolate;border-radius:24px;display:flex;align-items:center;padding:33px 35px 42px;background:linear-gradient(90deg,#061c16f8 0%,#06251de1 42%,#08341b54 100%),url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JJJQx7uBtP724OZ2KWNMaPLMsw/90f9486e-35e5-4e5c-a085-5794ecdb9177.png") center 58%/cover no-repeat;border:1px solid #5d944e;box-shadow:0 16px 46px #0008}
+.s24-hero:before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 72% 30%,#bcff4b30,transparent 43%),linear-gradient(180deg,#0000 65%,#020d09b0)}
+.s24-hero:after{content:"";position:absolute;height:2px;left:14%;right:14%;bottom:0;background:linear-gradient(90deg,transparent,#c6ff3d,transparent)}
+.s24-hero-content{position:relative;z-index:2;max-width:70%}
+.s24-eyebrow{display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border:1px solid #bfff626f;border-radius:30px;background:#173927a3;font:900 10px 'DM Sans',sans-serif;letter-spacing:1.2px;color:#d5ff8a}
+.s24-hero h1{color:#fff;font-size:clamp(29px,4vw,54px);max-width:650px;font-weight:1000;line-height:1.08;letter-spacing:-.7px;margin:17px 0 14px;text-shadow:0 3px 18px #0008}
+.s24-hero h1 em{display:block;font-style:normal;color:#d0ff44}
+.s24-hero p{color:#d2e5dc;font-size:clamp(12px,1.4vw,15px);line-height:1.7;max-width:560px;margin:0 0 25px}
+.s24-hero-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.s24-hero-actions button{border-radius:12px;display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:13px 19px;font-size:13px;font-weight:900;min-height:45px;color:#153519;background:#cfff39;border:1px solid #e6ff8e;box-shadow:0 8px 25px #0a1d0c87}
+.s24-hero-actions button+button{color:#eaffd5;background:#0b2a20cc;border-color:#94c45f9a;backdrop-filter:blur(7px)}
+.s24-hero-actions button:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.s24-hero-mark{position:absolute;right:7%;top:12%;height:75%;width:29%;z-index:1;display:grid;place-items:center;pointer-events:none}
+.s24-dashboard[dir=rtl] .s24-hero-mark{right:auto;left:7%}
+.s24-hero-mark img{width:min(100%,190px);max-height:100%;object-fit:contain;filter:drop-shadow(0 6px 25px #000c) drop-shadow(0 0 15px #c0fa649c);transform:rotate(-7deg)}
+.s24-hero-line{position:absolute;bottom:11px;left:28px;color:#9acc8e;font:800 9px 'DM Sans',sans-serif;letter-spacing:1.3px}
+.s24-dashboard[dir=rtl] .s24-hero-line{left:auto;right:28px}
+.s24-hero-line b{color:#c7fa3b;margin-left:10px}
+.s24-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:15px 0 19px}
+.s24-stats>div{background:linear-gradient(140deg,#153e2d,#0d2a20);border:1px solid #376346;border-radius:16px;padding:16px 18px;display:grid;grid-template-columns:30px 1fr;grid-template-rows:auto auto;align-items:center;column-gap:11px;box-shadow:0 7px 20px #02191144}
+.s24-stats svg{color:#c8ff4e;grid-row:1/3}
+.s24-stats strong{font:900 26px 'DM Sans',sans-serif;color:#fff}
+.s24-stats small{font-size:11px;color:#acc6b4}
+.s24-panels{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.9fr);gap:13px;margin-bottom:21px}
+.s24-match-feature,.s24-shortcuts{border-radius:20px;border:1px solid #3f7450;background:linear-gradient(140deg,#153b2c,#07291f);padding:21px;min-width:0;box-shadow:0 10px 32px #02120d5c}
+.s24-match-feature{position:relative;overflow:hidden;background:linear-gradient(110deg,#0b281fdf,#0a261acf),url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JJJQx7uBtP724OZ2KWNMaPLMsw/84272c46-75d6-40b9-8b0e-f00460e8cae9.png") center/cover}
+.s24-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:19px}
+.s24-card-head>span{display:inline-flex;align-items:center;gap:7px;color:#c8ff52;font:900 12px 'DM Sans',sans-serif;letter-spacing:.5px}
+.s24-card-head>small{border:1px solid #64835b;border-radius:14px;padding:5px 8px;color:#d0e9c9;font-size:10px}
+.s24-match-feature h3{font-size:clamp(18px,2.3vw,27px);color:#fff;line-height:1.2;max-width:90%;margin:0 0 12px}
+.s24-match-feature>p{color:#cbdfce;font-size:12px;display:flex;align-items:center;gap:7px;margin:0 0 16px}
+.s24-scoreline{display:flex;align-items:center;justify-content:space-around;border-block:1px solid #699b626a;padding:13px 0;margin-top:6px}
+.s24-scoreline>div{display:flex;align-items:center;flex-direction:column;gap:7px;color:#eafae8;font:800 11px 'DM Sans',sans-serif}
+.s24-scoreline strong{font:1000 30px 'DM Sans',sans-serif;color:#e8ffd3}
+.s24-scoreline>b{border:1px solid #bbfa6988;color:#dcff99;border-radius:50%;padding:11px;font:900 15px 'DM Sans',sans-serif}
+.s24-progress{height:7px;background:#b6e99c31;border-radius:8px;overflow:hidden;margin:14px 0}
+.s24-progress>i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#66e26a,#e0ff4e)}
+.s24-match-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11px;color:#b3d4b8;margin-bottom:15px}
+.s24-match-feature>button,.s24-no-feature button{border:0;border-radius:10px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:#caff49;color:#0f351a;font-size:12px;font-weight:900;padding:12px}
+.s24-no-feature{display:grid;place-items:center;text-align:center;min-height:205px;gap:9px}
+.s24-no-feature strong{font-size:18px;color:#f0ffde}
+.s24-no-feature p{font-size:12px;color:#acc9ac}
+.s24-shortcuts{display:flex;flex-direction:column}
+.s24-shortcut-grid{flex:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.s24-shortcut-grid button{border:1px solid #487753;border-radius:13px;background:#143e2d;min-width:0;display:flex;flex-direction:column;align-items:flex-start;text-align:start;gap:6px;padding:15px 12px;color:#ebffea}
+.s24-shortcut-grid button:hover{border-color:#c1ff5b;background:#1d5035;transform:translateY(-2px)}
+.s24-shortcut-grid button>span{display:grid;place-items:center;background:#bff54b24;border:1px solid #bbfc5d44;border-radius:12px;color:#ccff56;width:40px;height:40px}
+.s24-shortcut-grid strong{font-size:12px;font-weight:900}
+.s24-shortcut-grid small{font-size:10px;color:#9fbca7}
+.s24-heading{margin:17px 0 12px}
+.s24-heading small{font:900 10px 'DM Sans',sans-serif;letter-spacing:1.5px;color:#b3fc63}
+.s24-heading h2{color:#f2fff2!important;margin:6px 0;font-size:clamp(20px,2.3vw,27px);font-weight:900}
+.s24-sport-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.s24-sport{position:relative;overflow:hidden;isolation:isolate;min-height:148px;border:1px solid #46815c;border-radius:17px;padding:15px;display:flex;flex-direction:column;align-items:flex-start;text-align:start;color:#fff;gap:6px;background:#153d2c}
+.s24-sport::before{content:"";position:absolute;inset:0;z-index:-2;transition:transform .3s ease}
+.s24-football::before{background:linear-gradient(0deg,#062518f4,#04281933),url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JJJQx7uBtP724OZ2KWNMaPLMsw/90f9486e-35e5-4e5c-a085-5794ecdb9177.png") center/cover no-repeat}
+.s24-handball::before{background:linear-gradient(0deg,#081e2de8,#052b3b66),url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Handball_match.jpg") center/cover no-repeat}
+.s24-basketball::before{background:linear-gradient(0deg,#251a10ee,#40240b52),url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Match_de_basket.jpg") center/cover no-repeat}
+.s24-sport:hover::before{transform:scale(1.06)}
+.s24-sport.selected{border-color:#d5ff42;box-shadow:0 0 0 2px #c5ff416e,inset 0 0 20px #bfff441d}
+.s24-sport-emoji{font-size:28px;filter:drop-shadow(0 3px 10px #000c)}
+.s24-sport strong{font-size:18px;text-shadow:0 1px 7px #0009}
+.s24-sport small{font:800 10px 'DM Sans',sans-serif;color:#c3d4cb;letter-spacing:1.3px}
+.s24-sport>svg{position:absolute;right:13px;bottom:15px;color:#d8ff76}
+.s24-dashboard[dir=rtl] .s24-sport>svg{right:auto;left:13px}
+.s24-credits{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 18px}
+.s24-credits a{color:#608f72!important;font-size:9px;text-decoration:underline}
+.s24-find{margin-top:16px}
+.s24-filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#0f3024;border:1px solid #306c49;border-radius:16px;padding:11px}
+.s24-filters label{display:flex;align-items:center;gap:7px;min-height:43px;padding:0 12px;border-radius:11px;background:#173e2c;border:1px solid #3c7250;color:#bbf383;min-width:0}
+.s24-filters .s24-search{flex:1;min-width:190px}
+.s24-filters select,.s24-filters input{background:transparent!important;border:0!important;outline:0!important;color:#e7ffe4!important;max-width:100%;width:100%;font-size:13px}
+.s24-filters select option{background:#102b20;color:#fff}
+.s24-filters input::placeholder{color:#8dad9b}
+.s24-filters button{display:inline-flex;gap:7px;align-items:center;justify-content:center;min-height:43px;border:1px solid #c2ff57;background:#245336;color:#e0ffa8;border-radius:11px;padding:0 11px;font-size:12px;font-weight:800}
+.s24-geo-note{font-size:11px;color:#c5dfa8;margin:8px 0}
+.s24-tabs,.s24-sport-filters{display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin;margin-top:10px;padding-bottom:4px}
+.s24-tabs button,.s24-sport-filters button{flex-shrink:0;border:1px solid #356248;background:#122f23;color:#b2cbb7;font-size:12px;font-weight:900;padding:10px 15px;border-radius:10px}
+.s24-tabs button.active,.s24-sport-filters button.active{background:#caff42;color:#17301a;border-color:#efff9c}
+.s24-sport-filters button{font-size:11px;padding:7px 10px}
+.s24-events{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:15px}
+.s24-event{overflow:hidden;border-radius:15px;border:1px solid #376a4a;background:#102f23;min-width:0;box-shadow:0 9px 25px #06181063}
+.s24-event-img{height:116px;position:relative;background:linear-gradient(0deg,#06180fe2,#031d103a),url("https://d2ol7oe51mr4n9.cloudfront.net/user_3JJJQx7uBtP724OZ2KWNMaPLMsw/84272c46-75d6-40b9-8b0e-f00460e8cae9.png") center/cover no-repeat;display:flex;justify-content:space-between;align-items:flex-start;padding:11px;gap:8px}
+.s24-event-handball .s24-event-img{background:linear-gradient(0deg,#082d3acc,#0a202a49),url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Handball_match.jpg") center/cover no-repeat}
+.s24-event-basketball .s24-event-img{background:linear-gradient(0deg,#30200fdb,#3f28194a),url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Match_de_basket.jpg") center/cover no-repeat}
+.s24-event-img>span{border-radius:30px;padding:5px 9px;background:#052a1dba;border:1px solid #c1f79546;color:#fff;font-size:10px;white-space:nowrap}
+.s24-event-info{padding:13px 14px;min-width:0}
+.s24-event-info>strong{display:block;color:#fff;font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+.s24-event-info p{display:flex;align-items:center;gap:6px;color:#b9d0bd;font-size:11px;margin:10px 0;overflow-wrap:anywhere}
+.s24-event-info>div{display:flex;align-items:center;gap:8px;justify-content:space-between;border-top:1px solid #316147;padding-top:10px}
+.s24-event-info>div>span{font-size:10px;color:#c7e6c3;display:flex;align-items:center;gap:5px}
+.s24-event-info>div>b{font:900 16px 'DM Sans',sans-serif;color:#d8ff82}
+.s24-event-info>div>button{color:#bfff68;border:0;background:transparent;display:flex;align-items:center;gap:4px;font-size:12px;font-weight:900;white-space:nowrap}
+.s24-empty{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:180px;text-align:center;padding:20px;background:#102e22;border:1px dashed #427650;border-radius:15px;color:#e0ffe3}
+.s24-empty svg{color:#bafb68}.s24-empty strong{font-size:14px}.s24-empty p{color:#a1c6a7;font-size:11px}
+.s24-empty button{padding:10px 16px;border-radius:10px;background:#d0ff5e;color:#17331e;border:0;font-size:11px;font-weight:900}
+@media(max-width:1000px){.s24-panels{grid-template-columns:1fr}.s24-shortcut-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.s24-shortcut-grid button{min-height:115px}}
+@media(max-width:650px){
+.s24-dashboard{padding:0 0 90px}
+.s24-hero{min-height:306px;padding:24px 18px 35px;border-radius:0 0 24px 24px;margin-inline:-12px}
+.s24-hero-content{max-width:100%;z-index:2}
+.s24-eyebrow{font-size:9px;letter-spacing:.5px;padding:5px 9px}
+.s24-hero h1{font-size:clamp(28px,8vw,39px);max-width:78%;margin:14px 0}
+.s24-hero p{font-size:12px;max-width:73%;line-height:1.6}
+.s24-hero-mark{right:0;top:28%;width:33%;height:48%;opacity:.9}
+.s24-dashboard[dir=rtl] .s24-hero-mark{left:0;right:auto}
+.s24-hero-mark img{width:100%;transform:rotate(-8deg)}
+.s24-hero-actions{gap:7px}
+.s24-hero-actions button{padding:10px 12px;font-size:11px;min-height:39px}
+.s24-hero-actions button svg{width:15px}
+.s24-hero-line{font-size:8px}
+.s24-stats{gap:6px;margin-top:10px}
+.s24-stats>div{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;padding:10px 3px;border-radius:12px}
+.s24-stats svg{width:17px;height:17px}
+.s24-stats strong{font-size:19px}
+.s24-stats small{font-size:9px}
+.s24-match-feature,.s24-shortcuts{padding:16px;border-radius:17px}
+.s24-shortcut-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.s24-shortcut-grid button{min-height:110px;padding:12px}
+.s24-sport-grid{gap:7px}
+.s24-sport{min-height:130px;border-radius:13px;padding:10px}
+.s24-sport strong{font-size:13px}
+.s24-sport small{font-size:9px}
+.s24-sport-emoji{font-size:24px}
+.s24-sport>svg{display:none}
+.s24-filters{padding:8px;gap:7px}
+.s24-filters label{min-height:42px}
+.s24-filters .s24-search{flex-basis:100%;min-width:100%;order:4}
+.s24-events{grid-template-columns:1fr;gap:9px}
+.s24-event-img{height:105px}
+.s24-event-info{padding:12px}
+}
+@media(max-width:370px){.s24-hero h1{font-size:27px;max-width:85%}.s24-hero p{max-width:80%}.s24-hero-mark{opacity:.45}.s24-hero-actions button{font-size:10px}.s24-card-head>span{font-size:10px}.s24-sport strong{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.s24-sport::before,.s24-shortcut-grid button{transition:none!important}}
