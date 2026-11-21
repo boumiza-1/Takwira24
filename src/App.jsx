@@ -548,7 +548,7 @@ export default function App() {
         <div className="t24-season-profile"><div><span>SEASON 2026/2027</span><h3>{t('تقييم الموسم','Note de la saison')}</h3></div><strong>⭐ {playerSeasonRating(user.id).average===null?'—':playerSeasonRating(user.id).average.toFixed(1)+'/10'}</strong><small>{playerSeasonRating(user.id).count} {t('تقييمات','notes')} • {playerSeasonRating(user.id).matches} {t('ماتشات','matchs')}</small></div>
         <MediaModeration user={user} lang={lang} onProfileChanged={()=>refreshData(user)}/>
         <button className="outline-button" type="button" onClick={()=>setViewedPlayer(profile)}>{t('👀 شوف البروفيل متاعي كيما يظهر للناس','👀 Voir mon profil public')}</button></>}</>}
-      <footer className="footer"><span>© 2026 Takwira24</span><span>{t('اللعبة تجمعنا 💚','Le sport nous réunit 💚')}</span><span>{isSupabaseConfigured?'SUPABASE':'CONFIGURATION REQUIRED'}</span></footer>
+      <footer className="footer"><span>© 2026 Takwira24</span><span>{t('اللعبة تجمعنا 💚','Le sport nous réunit 💚')}</span><span><a href={`${import.meta.env.BASE_URL}privacy.html`} target="_blank" rel="noopener noreferrer">{t('سياسة الخصوصية','Politique de confidentialité')}</a> · <a href={`${import.meta.env.BASE_URL}delete-account.html`} target="_blank" rel="noopener noreferrer">{t('حذف الحساب','Suppression de compte')}</a></span></footer>
     </main>
 
     {joinTarget&&<JoinPositionModal match={joinTarget.match} team={joinTarget.team} lang={lang} entries={lineup} busy={busy} onClose={()=>setJoinTarget(null)} onSubmit={slot=>requestToJoinTeam(joinTarget.match,joinTarget.team,slot)}/>}
